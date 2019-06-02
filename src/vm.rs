@@ -200,10 +200,7 @@ impl Chip8 {
     /// Skips the next instruction if VX equals NN.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_3XNN(&mut self) {
-        let VX = self.VX();
-        let NN = self.NN();
-
-        if VX == NN {
+        if self.VX() == self.NN() {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -213,10 +210,7 @@ impl Chip8 {
     /// Skips the next instruction if VX doesn't equal NN.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_4XNN(&mut self) {
-        let VX = self.VX();
-        let NN = self.NN();
-
-        if VX != NN {
+        if self.VX() != self.NN() {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -226,10 +220,7 @@ impl Chip8 {
     /// Skips the next instruction if VX equals VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_5XY0(&mut self) {
-        let VX = self.VX();
-        let VY = self.VY();
-
-        if VX == VY {
+        if self.VX() == self.VY() {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -238,64 +229,47 @@ impl Chip8 {
 
     /// Sets VX to NN.
     fn opcode_6XNN(&mut self) {
-        let X = self.X();
-        let NN = self.NN();
-
-        self.V[X] = NN;
+        self.V[self.X()] = self.NN();
         self.pc += 2;
     }
 
     /// Adds NN to VX. (Carry flag is not changed)
     fn opcode_7XNN(&mut self) {
         let X = self.X();
-        let NN = self.NN();
 
-        self.V[X] = self.V[X].overflowing_add(NN).0;
+        self.V[X] = self.V[X].wrapping_add(self.NN());
         self.pc += 2;
     }
 
     /// Sets VX to the value of VY.
     fn opcode_8XY0(&mut self) {
-        let X = self.X();
-        let VY = self.VY();
-
-        self.V[X] = VY;
+        self.V[self.X()] = self.VY();
         self.pc += 2;
     }
 
     /// Sets VX to VX or VY. (Bitwise OR operation)
     fn opcode_8XY1(&mut self) {
-        let X = self.X();
-        let VY = self.VY();
-
-        self.V[X] |= VY;
+        self.V[self.X()] |= self.VY();
         self.pc += 2;
     }
 
     /// Sets VX to VX and VY. (Bitwise AND operation)
     fn opcode_8XY2(&mut self) {
-        let X = self.X();
-        let VY = self.VY();
-
-        self.V[X] &= VY;
+        self.V[self.X()] &= self.VY();
         self.pc += 2;
     }
 
     /// Sets VX to VX xor VY.
     fn opcode_8XY3(&mut self) {
-        let X = self.X();
-        let VY = self.VY();
-
-        self.V[X] ^= VY;
+        self.V[self.X()] ^= self.VY();
         self.pc += 2;
     }
 
     /// Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
     fn opcode_8XY4(&mut self) {
         let X = self.X();
-        let VY = self.VY();
 
-        let (res, carry) = self.V[X].overflowing_add(VY);
+        let (res, carry) = self.V[X].overflowing_add(self.VY());
         self.V[X] = res;
         if carry {
             self.V[0xF] = 1;
@@ -309,9 +283,8 @@ impl Chip8 {
     /// and 1 when there isn't.
     fn opcode_8XY5(&mut self) {
         let X = self.X();
-        let VY = self.VY();
 
-        let (res, carry) = self.V[X].overflowing_sub(VY);
+        let (res, carry) = self.V[X].overflowing_sub(self.VY());
         self.V[X] = res;
         if carry {
             self.V[0xF] = 1;
@@ -336,8 +309,7 @@ impl Chip8 {
     /// and 1 when there isn't.
     fn opcode_8XY7(&mut self) {
         let X = self.X();
-        let VY = self.VY();
-        let (res, carry) = VY.overflowing_sub(self.V[X]);
+        let (res, carry) = self.VY().overflowing_sub(self.V[X]);
 
         self.V[X] = res;
         if carry {
@@ -361,10 +333,7 @@ impl Chip8 {
     /// Skips the next instruction if VX doesn't equal VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_9XY0(&mut self) {
-        let VX = self.VX();
-        let VY = self.VY();
-
-        if VX != VY {
+        if self.VX() != self.VY() {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -373,26 +342,20 @@ impl Chip8 {
 
     /// Sets I to the address NNN
     fn opcode_ANNN(&mut self) {
-        let NNN = self.NNN();
-
-        self.I = NNN;
+        self.I = self.NNN();
         self.pc += 2;
     }
 
     /// Jumps to the address NNN plus V0.
     fn opcode_BNNN(&mut self) {
-        let NNN = self.NNN() as usize;
-
-        self.pc = NNN + self.V[0] as usize;
+        self.pc = self.NNN() as usize + self.V[0] as usize;
     }
 
     /// Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
     fn opcode_CXNN(&mut self) {
-        let X = self.X();
-        let NN = self.NN();
         let rand: u8 = rand::thread_rng().gen();
 
-        self.V[X] = rand & NN;
+        self.V[self.X()] = rand & self.NN();
         self.pc += 2;
     }
 
@@ -427,9 +390,7 @@ impl Chip8 {
     /// Skips the next instruction if the key stored in VX is pressed.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_EX9E(&mut self) {
-        let VX = self.VX();
-
-        if self.key[VX as usize] {
+        if self.key[self.VX() as usize] {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -439,9 +400,7 @@ impl Chip8 {
     /// Skips the next instruction if the key stored in VX isn't pressed.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_EXA1(&mut self) {
-        let VX = self.VX();
-
-        if self.key[VX as usize] == false {
+        if self.key[self.VX() as usize] == false {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -450,9 +409,7 @@ impl Chip8 {
 
     /// Sets VX to the value of the delay timer.
     fn opcode_FX07(&mut self) {
-        let X = self.X();
-
-        self.V[X] = self.delay_timer;
+        self.V[self.X()] = self.delay_timer;
         self.pc += 2;
     }
 
@@ -461,11 +418,9 @@ impl Chip8 {
     /// Actually this is implemented by NOT incrementing the program counter (pc)
     /// so when getting the new opcode we'll re-execute this instruction
     fn opcode_FX0A(&mut self) {
-        let X = self.X();
-
         for (idx, key) in self.key.iter().enumerate() {
             if *key {
-                self.V[X] = idx as u8;
+                self.V[self.X()] = idx as u8;
                 self.pc += 2;
                 return;
             }
@@ -475,24 +430,19 @@ impl Chip8 {
 
     /// Sets the delay timer to VX.
     fn opcode_FX15(&mut self) {
-        let VX = self.VX();
-
-        self.delay_timer = VX;
+        self.delay_timer = self.VX();
         self.pc += 2;
     }
 
     /// Sets the sound timer to VX.
     fn opcode_FX18(&mut self) {
-        let VX = self.VX();
-
-        self.sound_timer = VX;
+        self.sound_timer = self.VX();
         self.pc += 2;
     }
 
     /// Adds VX to I.
     fn opcode_FX1E(&mut self) {
-        let VX = self.VX();
-        let (res, carry) = self.I.overflowing_add(VX as u16);
+        let (res, carry) = self.I.overflowing_add(self.VX() as u16);
         self.I = res;
         if carry {
             self.V[0xF] = 1;
@@ -505,9 +455,7 @@ impl Chip8 {
     /// Sets I to the location of the sprite for the character in VX.
     /// Characters 0-F (in hexadecimal) are represented by a 4x5 font.
     fn opcode_FX29(&mut self) {
-        let VX = self.VX();
-
-        self.I = (VX * 0x5) as u16; // TODO check for overflow?
+        self.I = (self.VX() * 0x5) as u16; // TODO check for overflow?
         self.pc += 2;
     }
 
@@ -526,9 +474,7 @@ impl Chip8 {
     /// The offset from I is increased by 1 for each value written,
     /// but I itself is left unmodified.
     fn opcode_FX55(&mut self) {
-        let X = self.X();
-
-        for i in 0..X {
+        for i in 0..self.X() {
             self.memory[self.I as usize + i] = self.V[i];
         }
 
@@ -540,9 +486,7 @@ impl Chip8 {
     /// The offset from I is increased by 1 for each value written,
     /// but I itself is left unmodified.
     fn opcode_FX65(&mut self) {
-        let X = self.X();
-
-        for i in 0..X {
+        for i in 0..self.X() {
             self.V[i as usize] = self.memory[self.I as usize + i];
         }
 
