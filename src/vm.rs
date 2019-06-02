@@ -28,19 +28,21 @@ const FONTSET: [u8; 5 * 16] = [
 ];
 
 pub struct Chip8 {
-    opcode: u16,               /* all the instruction are on two bytes */
-    memory: [u8; MEMORY_SIZE], /* 4ko for the chip8 */
-    V: [u8; 16],               /* 15 register + one carry flag*/
-    I: u16,                    /* index register */
-    pc: usize,                 /* program counter */
+    opcode: u16,               // all the instruction are on two bytes
+    memory: [u8; MEMORY_SIZE], // 4ko for the chip8
+    V: [u8; 16],               // 15 register + one carry flag
+    I: u16,                    // index register
+    pc: usize,                 // program counter
     stack: [usize; 16],
-    sp: usize, /* stack pointer */
+    sp: usize, // stack pointer
 
-    delay_timer: u8, /* timers -> goto zero */
-    sound_timer: u8, /* when zero buzzer is triggered */
+    delay_timer: u8, // timers -> goto zero
+    sound_timer: u8, // when zero buzzer is triggered
 
-    key: [bool; 16],       /* which key are pressed */
-    screen: [u8; 64 * 32], /* pixel array */
+    key: [bool; 16],       // which key are pressed
+    screen: [u8; 64 * 32], // pixel array
+
+    draw: bool, // indicate if we should draw the screen
 }
 
 impl Chip8 {
@@ -59,6 +61,8 @@ impl Chip8 {
 
             key: [false; 16],
             screen: [0; 64 * 32],
+
+            draw: true,
         };
 
         for (i, v) in FONTSET.iter().enumerate() {
@@ -86,8 +90,13 @@ impl Chip8 {
         self.sound_timer == 1
     }
 
-    pub fn update(&mut self) -> &[u8] {
-        &self.screen
+    pub fn update(&mut self) -> Option<&[u8]> {
+        let draw = self.draw;
+        self.draw = false;
+        match draw {
+            true => Some(&self.screen),
+            false => None,
+        }
     }
 
     fn handle_opcode(&mut self) {
@@ -170,6 +179,7 @@ impl Chip8 {
             *p = 0
         }
         self.pc += 2;
+        self.draw = true;
     }
 
     /// Returns from a subroutine.
@@ -371,6 +381,7 @@ impl Chip8 {
             }
         }
         self.pc += 2;
+        self.draw = true;
     }
 
     /// Skips the next instruction if the key stored in VX is pressed.
@@ -502,6 +513,7 @@ mod tests {
         for p in c.screen.iter() {
             assert_eq!(*p, 0);
         }
+        assert_eq!(c.draw, true);
     }
 
     #[test]
@@ -873,6 +885,7 @@ mod tests {
         c.opcode = 0xDABC;
         c.opcode_DXYN();
         assert_eq!(c.pc, 0x202);
+        assert_eq!(c.draw, true);
         // TODO test more things TODO
     }
 

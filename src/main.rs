@@ -22,7 +22,8 @@ fn main() {
 
     loop {
         chip.cycle();
-        let screen = chip.update();
-        gfx.update(screen);
+        if let Some(screen) = chip.update() {
+            gfx.update(screen);
+        }
     }
 }
