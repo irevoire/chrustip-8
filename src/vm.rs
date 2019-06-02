@@ -571,4 +571,56 @@ mod tests {
             assert_eq!(*p, 0);
         }
     }
+
+    #[test]
+    fn opcode_00EE() {
+        let mut c = init();
+        c.sp = 1;
+        c.stack[0] = 40;
+        c.opcode_00EE();
+        assert_eq!(c.sp, 0);
+        assert_eq!(c.pc, 42);
+    }
+
+    #[test]
+    fn opcode_0NNN() {
+        let mut c = init();
+        c.opcode_0NNN();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_1NNN() {
+        let mut c = init();
+        c.opcode = 0x1B0B;
+        c.opcode_1NNN();
+        assert_eq!(c.pc, 0xB0B);
+    }
+
+    #[test]
+    fn opcode_2NNN() {
+        let mut c = init();
+        c.opcode = 0x2B0B;
+        c.opcode_2NNN();
+        assert_eq!(
+            c.stack,
+            [0x200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        );
+        assert_eq!(c.sp, 1);
+        assert_eq!(c.pc, 0xB0B);
+    }
+
+    #[test]
+    fn return_after_call() {
+        let mut c = init();
+        c.opcode = 0x2B0B;
+        c.opcode_2NNN();
+        c.opcode_00EE();
+        assert_eq!(
+            c.stack, // we don't clear the stack after returning
+            [0x200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        );
+        assert_eq!(c.sp, 0);
+        assert_eq!(c.pc, 0x202);
+    }
 }
