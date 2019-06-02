@@ -78,14 +78,12 @@ impl Chip8 {
     pub fn cycle(&mut self) {
         self.handle_opcode();
 
-        if self.delay_timer > 0 {
-            self.delay_timer -= 1
-        }
-        match self.sound_timer {
-            0 => (),
-            1 => self.sound_timer -= 1,
-            _ => self.sound_timer -= 1,
-        }
+        self.delay_timer = self.delay_timer.checked_sub(1).unwrap_or(0);
+        self.sound_timer = self.sound_timer.checked_sub(1).unwrap_or(0);
+    }
+
+    pub fn sound(&self) -> bool {
+        self.sound_timer == 1
     }
 
     pub fn update(&mut self) -> &[u8] {
