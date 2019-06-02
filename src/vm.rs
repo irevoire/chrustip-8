@@ -548,3 +548,27 @@ impl Chip8 {
         self.pc += 2;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn init() -> Chip8 {
+        Chip8::new()
+    }
+
+    #[test]
+    fn test_init() {
+        let _c = init(); // it could segfault ¯\_(ツ)_/¯
+    }
+
+    #[test]
+    fn opcode_00E0() {
+        let mut c = init();
+        c.opcode_00E0();
+        assert_eq!(c.pc, 0x202);
+        for p in c.screen.iter() {
+            assert_eq!(*p, 0);
+        }
+    }
+}
