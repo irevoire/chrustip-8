@@ -1,7 +1,11 @@
 use minifb::{Key, KeyRepeat};
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 pub struct Gfx {
     window: minifb::Window,
+    frequency: Duration,
+    current_time: Instant,
     width: usize,
     height: usize,
     buffer: Vec<u32>,
@@ -24,6 +28,9 @@ impl Gfx {
         };
         let gfx = Gfx {
             window: window.unwrap(),
+            // we want 60 frames per seconds
+            frequency: Duration::from_secs(1).checked_div(60).unwrap(),
+            current_time: Instant::now(),
             width,
             height,
             buffer: vec![0; width * height],
@@ -39,9 +46,15 @@ impl Gfx {
             self.buffer[i] = (color << 24) | (color << 16) | (color << 8) | color;
         }
 
+        match self.frequency.checked_sub(self.current_time.elapsed()) {
+            None => println!("We are SLOW!"),
+            Some(t) => sleep(t),
+        }
         self.window
             .update_with_buffer(&self.buffer)
             .unwrap_or_else(|e| println!("Window update failed: {}", e));
+
+        self.current_time = Instant::now();
     }
 
     pub fn sound(&self) {
