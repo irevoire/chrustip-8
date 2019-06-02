@@ -6,8 +6,6 @@ use rand::Rng;
 use std::fs::File;
 use std::io::prelude::*;
 
-use crate::gfx::Gfx;
-
 const MEMORY_SIZE: usize = 0x1000;
 
 const FONTSET: [u8; 5 * 16] = [
@@ -43,8 +41,6 @@ pub struct Chip8 {
 
     key: [bool; 16],       /* which key are pressed */
     screen: [u8; 64 * 32], /* pixel array */
-
-    pub gfx: Gfx,
 }
 
 impl Chip8 {
@@ -63,8 +59,6 @@ impl Chip8 {
 
             key: [false; 16],
             screen: [0; 64 * 32],
-
-            gfx: Gfx::new(64, 32).unwrap(),
         };
 
         for (i, v) in FONTSET.iter().enumerate() {
@@ -94,16 +88,13 @@ impl Chip8 {
         }
         match self.sound_timer {
             0 => (),
-            1 => {
-                self.gfx.sound();
-                self.sound_timer -= 1
-            }
+            1 => self.sound_timer -= 1,
             _ => self.sound_timer -= 1,
         }
     }
 
-    pub fn update(&mut self) {
-        self.gfx.update(&self.screen);
+    pub fn update(&mut self) -> &[u8] {
+        &self.screen
     }
 
     fn handle_opcode(&mut self) {
@@ -190,7 +181,6 @@ impl Chip8 {
         for p in self.screen.iter_mut() {
             *p = 0
         }
-        self.gfx.clear();
         self.pc += 2;
     }
 

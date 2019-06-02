@@ -9,17 +9,20 @@ fn main() {
         None => {
             println!("Need a game as argument");
             return;
-        },
+        }
     };
 
+    let mut gfx = gfx::Gfx::new(64, 32).unwrap();
     let mut chip = vm::Chip8::new();
+
     if let Err(e) = chip.load_game(&filename) {
         println!("Can't load game : {}", e);
-        return
+        return;
     }
 
     loop {
         chip.cycle();
-        chip.update();
+        let screen = chip.update();
+        gfx.update(screen);
     }
 }
