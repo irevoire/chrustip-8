@@ -200,30 +200,27 @@ impl Chip8 {
     /// Skips the next instruction if VX equals NN.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_3XNN(&mut self) {
-        if self.VX() == self.NN() {
-            self.pc += 4;
-        } else {
-            self.pc += 2;
+        match self.VX() == self.NN() {
+            true => self.pc += 4,
+            false => self.pc += 2,
         }
     }
 
     /// Skips the next instruction if VX doesn't equal NN.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_4XNN(&mut self) {
-        if self.VX() != self.NN() {
-            self.pc += 4;
-        } else {
-            self.pc += 2;
+        match self.VX() != self.NN() {
+            true => self.pc += 4,
+            false => self.pc += 2,
         }
     }
 
     /// Skips the next instruction if VX equals VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_5XY0(&mut self) {
-        if self.VX() == self.VY() {
-            self.pc += 4;
-        } else {
-            self.pc += 2;
+        match self.VX() == self.VY() {
+            true => self.pc += 4,
+            false => self.pc += 2,
         }
     }
 
@@ -271,11 +268,7 @@ impl Chip8 {
 
         let (res, carry) = self.V[X].overflowing_add(self.VY());
         self.V[X] = res;
-        if carry {
-            self.V[0xF] = 1;
-        } else {
-            self.V[0xF] = 0;
-        }
+        self.V[0xF] = carry.into();
         self.pc += 2;
     }
 
@@ -286,12 +279,7 @@ impl Chip8 {
 
         let (res, carry) = self.V[X].overflowing_sub(self.VY());
         self.V[X] = res;
-        if carry {
-            self.V[0xF] = 1;
-        } else {
-            self.V[0xF] = 0;
-        }
-
+        self.V[0xF] = carry.into();
         self.pc += 2;
     }
 
@@ -312,12 +300,7 @@ impl Chip8 {
         let (res, carry) = self.VY().overflowing_sub(self.V[X]);
 
         self.V[X] = res;
-        if carry {
-            self.V[0xF] = 1;
-        } else {
-            self.V[0xF] = 0;
-        }
-
+        self.V[0xF] = carry.into();
         self.pc += 2;
     }
 
@@ -333,10 +316,9 @@ impl Chip8 {
     /// Skips the next instruction if VX doesn't equal VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_9XY0(&mut self) {
-        if self.VX() != self.VY() {
-            self.pc += 4;
-        } else {
-            self.pc += 2;
+        match self.VX() != self.VY() {
+            true => self.pc += 4,
+            false => self.pc += 2,
         }
     }
 
@@ -390,20 +372,18 @@ impl Chip8 {
     /// Skips the next instruction if the key stored in VX is pressed.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_EX9E(&mut self) {
-        if self.key[self.VX() as usize] {
-            self.pc += 4;
-        } else {
-            self.pc += 2;
+        match self.key[self.VX() as usize] {
+            true => self.pc += 4,
+            false => self.pc += 2,
         }
     }
 
     /// Skips the next instruction if the key stored in VX isn't pressed.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_EXA1(&mut self) {
-        if self.key[self.VX() as usize] == false {
-            self.pc += 4;
-        } else {
-            self.pc += 2;
+        match self.key[self.VX() as usize] {
+            true => self.pc += 2,
+            false => self.pc += 4,
         }
     }
 
@@ -444,11 +424,7 @@ impl Chip8 {
     fn opcode_FX1E(&mut self) {
         let (res, carry) = self.I.overflowing_add(self.VX() as u16);
         self.I = res;
-        if carry {
-            self.V[0xF] = 1;
-        } else {
-            self.V[0xF] = 0;
-        }
+        self.V[0xF] = carry.into();
         self.pc += 2;
     }
 
