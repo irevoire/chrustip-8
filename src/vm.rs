@@ -262,7 +262,8 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    /// Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
+    /// Adds VY to VX.
+    /// VF is set to 1 when there's a carry, and to 0 when there isn't.
     fn opcode_8XY4(&mut self) {
         let X = self.X();
 
@@ -304,7 +305,8 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    /// Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
+    /// Stores the most significant bit of VX in VF and then shifts
+    /// VX to the left by 1.
     fn opcode_8XYE(&mut self) {
         let X = self.X();
 
@@ -333,7 +335,8 @@ impl Chip8 {
         self.pc = self.NNN() as usize + self.V[0] as usize;
     }
 
-    /// Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
+    /// Sets VX to the result of a bitwise and operation on
+    /// a random number (Typically: 0 to 255) and NN.
     fn opcode_CXNN(&mut self) {
         let rand: u8 = rand::thread_rng().gen();
 
@@ -341,10 +344,12 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    /// Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
-    /// Each row of 8 pixels is read as bit-coded starting from memory location I;
+    /// Draws a sprite at coordinate (VX, VY) that has a width
+    /// of 8 pixels and a height of N pixels. Each row of 8 pixels is read
+    /// as bit-coded starting from memory location I;
     /// I value doesn’t change after the execution of this instruction.
-    /// As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen.
+    /// As described above, VF is set to 1 if any screen pixels are flipped
+    /// from set to unset when the sprite is drawn, and to 0 if that doesn’t happen.
     fn opcode_DXYN(&mut self) {
         let X = self.VX() as usize;
         let Y = self.VY() as usize;
@@ -395,7 +400,7 @@ impl Chip8 {
 
     /// A key press is awaited, and then stored in VX.
     /// (Blocking Operation. All instruction halted until next key event)
-    /// Actually this is implemented by NOT incrementing the program counter (pc)
+    /// This is implemented by NOT incrementing the program counter (pc)
     /// so when getting the new opcode we'll re-execute this instruction
     fn opcode_FX0A(&mut self) {
         for (idx, key) in self.key.iter().enumerate() {
@@ -435,8 +440,14 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    /// Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2.
-    /// (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2)
+    /// Stores the binary-coded decimal representation of VX, with
+    /// the most significant of three digits at the address in I, the middle
+    /// digit at I plus 1, and the least significant digit at I plus 2.
+    /// -------------------
+    /// In other words, take the decimal representation of VX:
+    /// * Place the hundreds digit in memory at location in I
+    /// * The tens digit at location I+1
+    /// * And the ones digit at location I+2)
     fn opcode_FX33(&mut self) {
         let VX = self.VX();
 
@@ -458,9 +469,9 @@ impl Chip8 {
         self.pc += 2;
     }
 
-    /// Fills V0 to VX (including VX) with values from memory starting at address I.
-    /// The offset from I is increased by 1 for each value written,
-    /// but I itself is left unmodified.
+    /// Fills V0 to VX (including VX) with values from memory starting
+    /// at address I. The offset from I is increased by 1 for each
+    /// value written, but I itself is left unmodified.
     fn opcode_FX65(&mut self) {
         for i in 0..self.X() {
             self.V[i as usize] = self.memory[self.I as usize + i];
