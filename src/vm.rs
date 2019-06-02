@@ -373,8 +373,8 @@ impl Chip8 {
     /// Skips the next instruction if VX doesn't equal VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_9XY0(&mut self) {
-        let X = (self.opcode & 0x0F00) >> 8) as usize;
-        let Y = (self.opcode & 0x00F0) >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         if self.V[X] != self.V[Y] {
             self.pc += 4;
@@ -400,7 +400,7 @@ impl Chip8 {
 
     /// Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN.
     fn opcode_CXNN(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
         let NN = (self.opcode & 0x00FF) as u8;
         let rand: u8 = rand::thread_rng().gen();
 
@@ -413,9 +413,9 @@ impl Chip8 {
     /// I value doesn’t change after the execution of this instruction.
     /// As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen.
     fn opcode_DXYN(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
         let X = self.V[X] as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
         let Y = self.V[Y] as usize;
         let N = (self.opcode & 0x000F) as usize; // heigth
         let mut pixel: u16;
@@ -441,9 +441,9 @@ impl Chip8 {
     /// Skips the next instruction if the key stored in VX is pressed.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_EX9E(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
-        if self.key[self.V[X] as usize] == true {
+        if self.key[self.V[X] as usize] {
             self.pc += 4;
         } else {
             self.pc += 2;
@@ -453,7 +453,7 @@ impl Chip8 {
     /// Skips the next instruction if the key stored in VX isn't pressed.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_EXA1(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         if self.key[self.V[X] as usize] == false {
             self.pc += 4;
@@ -464,7 +464,7 @@ impl Chip8 {
 
     /// Sets VX to the value of the delay timer.
     fn opcode_FX07(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         self.V[X] = self.delay_timer;
         self.pc += 2;
@@ -472,8 +472,10 @@ impl Chip8 {
 
     /// A key press is awaited, and then stored in VX.
     /// (Blocking Operation. All instruction halted until next key event)
+    /// Actually this is implemented by NOT incrementing the program counter (pc)
+    /// so when getting the new opcode we'll re-execute this instruction
     fn opcode_FX0A(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         for (idx, key) in self.key.iter().enumerate() {
             if *key {
@@ -487,7 +489,7 @@ impl Chip8 {
 
     /// Sets the delay timer to VX.
     fn opcode_FX15(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         self.delay_timer = self.V[X];
         self.pc += 2;
@@ -495,7 +497,7 @@ impl Chip8 {
 
     /// Sets the sound timer to VX.
     fn opcode_FX18(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         self.sound_timer = self.V[X];
         self.pc += 2;
@@ -503,30 +505,30 @@ impl Chip8 {
 
     /// Adds VX to I.
     fn opcode_FX1E(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-
-        if self.I + self.V[X] as u16 > 0xFFF {
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let (res, carry) = self.I.overflowing_add(self.V[X] as u16);
+        self.I = res;
+        if carry {
             self.V[0xF] = 1;
         } else {
             self.V[0xF] = 0;
         }
-        self.I += self.V[X] as u16;
         self.pc += 2;
     }
 
     /// Sets I to the location of the sprite for the character in VX.
     /// Characters 0-F (in hexadecimal) are represented by a 4x5 font.
     fn opcode_FX29(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
-        self.I = (self.V[X] * 0x5) as u16;
+        self.I = (self.V[X] * 0x5) as u16; // TODO check for overflow?
         self.pc += 2;
     }
 
     /// Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2.
     /// (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2)
     fn opcode_FX33(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         self.memory[(self.I) as usize] = self.V[X] / 100;
         self.memory[(self.I + 1) as usize] = (self.V[X] / 10) % 10;
@@ -535,27 +537,30 @@ impl Chip8 {
     }
 
     /// Stores V0 to VX (including VX) in memory starting at address I.
-    /// The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+    /// The offset from I is increased by 1 for each value written,
+    /// but I itself is left unmodified.
     fn opcode_FX55(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         for i in 0..X {
             self.memory[self.I as usize + i] = self.V[i];
         }
 
-        self.I += X as u16 + 1;
+        // self.I += X as u16 + 1; // "I is left unmodified"
         self.pc += 2;
     }
 
     /// Fills V0 to VX (including VX) with values from memory starting at address I.
-    /// The offset from I is increased by 1 for each value written, but I itself is left unmodified.
+    /// The offset from I is increased by 1 for each value written,
+    /// but I itself is left unmodified.
     fn opcode_FX65(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         for i in 0..X {
             self.V[i as usize] = self.memory[self.I as usize + i];
         }
-        self.I += X as u16 + 1;
+
+        // self.I += X as u16 + 1; // "I is left unmodified"
         self.pc += 2;
     }
 }
@@ -895,6 +900,243 @@ mod tests {
         c.opcode_8XYE();
         assert_eq!(c.V[0xA], 0xEF << 1);
         assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_9XY0_not_equal() {
+        let mut c = init();
+        c.opcode = 0x9AB0;
+        c.V[0xA] = 0xAA;
+        c.V[0xB] = 0xBB;
+        c.opcode_9XY0();
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_9XY0_equal() {
+        let mut c = init();
+        c.opcode = 0x9AB0;
+        c.V[0xA] = 0xAA;
+        c.V[0xB] = 0xAA;
+        c.opcode_9XY0();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_ANNN() {
+        let mut c = init();
+        c.opcode = 0xA777;
+        c.opcode_ANNN();
+        assert_eq!(c.I, 0x777);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_BNNN() {
+        let mut c = init();
+        c.opcode = 0xB777;
+        c.V[0x0] = 0x11;
+        c.opcode_BNNN();
+        assert_eq!(c.pc, 0x788);
+    }
+
+    #[test]
+    fn opcode_CXNN() {
+        let mut c = init();
+        c.opcode = 0xC7F0; // the right part should be to zero event after the and
+        c.opcode_CXNN();
+        assert_eq!(c.V[0x7] & 0x0F, 0x0);
+        // can't test a lot more because of random
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_DXYN() {
+        let mut c = init();
+        c.opcode = 0xDABC;
+        c.opcode_DXYN();
+        assert_eq!(c.pc, 0x202);
+        // TODO test more things TODO
+    }
+
+    #[test]
+    fn opcode_EX9E_pressed() {
+        let mut c = init();
+        c.opcode = 0xEA9E;
+        c.V[0xA] = 0x07;
+        c.key[0x7] = true;
+        c.opcode_EX9E();
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_EX9E_not_pressed() {
+        let mut c = init();
+        c.opcode = 0xEA9E;
+        c.V[0xA] = 0x07;
+        c.key[0x7] = false;
+        c.opcode_EX9E();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_EXA1_pressed() {
+        let mut c = init();
+        c.opcode = 0xEA9E;
+        c.V[0xA] = 0x07;
+        c.key[0x7] = true;
+        c.opcode_EXA1();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_EXA1_not_pressed() {
+        let mut c = init();
+        c.opcode = 0xEA9E; // the right part should be to zero event after the and
+        c.V[0xA] = 0x07;
+        c.key[0x7] = false;
+        c.opcode_EXA1();
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_FX07() {
+        let mut c = init();
+        c.opcode = 0xFA07; // the right part should be to zero event after the and
+        c.V[0xA] = 0x07;
+        c.delay_timer = 0x12;
+        c.opcode_FX07();
+        assert_eq!(c.V[0xA], 0x12);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX0A() {
+        let mut c = init();
+        c.opcode = 0xEA9E; // the right part should be to zero event after the and
+        c.V[0xA] = 0x07;
+        c.opcode_FX0A();
+        assert_eq!(c.V[0xA], 0x07);
+        assert_eq!(c.pc, 0x200);
+
+        c.key[0x2] = true;
+        c.opcode_FX0A();
+        assert_eq!(c.V[0xA], 0x02);
+        assert_eq!(c.pc, 0x202);
+
+        c.key[0x2] = false;
+        c.key[0x8] = true;
+        c.opcode_FX0A();
+        assert_eq!(c.V[0xA], 0x08);
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_FX15() {
+        let mut c = init();
+        c.opcode = 0xFA15;
+        c.V[0xA] = 0x77;
+        c.opcode_FX15();
+        assert_eq!(c.delay_timer, 0x77);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX18() {
+        let mut c = init();
+        c.opcode = 0xFA18;
+        c.V[0xA] = 0x77;
+        c.opcode_FX18();
+        assert_eq!(c.sound_timer, 0x77);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX1E_without_carry() {
+        let mut c = init();
+        c.opcode = 0xFA1E;
+        c.V[0xA] = 0x11;
+        c.I = 0xAA;
+        c.opcode_FX1E();
+        assert_eq!(c.I, 0xBB);
+        assert_eq!(c.V[0xF], 0x0);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX1E_with_carry() {
+        let mut c = init();
+        c.opcode = 0xFA1E;
+        c.V[0xA] = 0x23;
+        c.I = 0xFFEE;
+        c.opcode_FX1E();
+        assert_eq!(c.I, 0x11);
+        assert_eq!(c.V[0xF], 0x1);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX29() {
+        let mut c = init();
+        c.opcode = 0xFA29;
+        c.V[0xA] = 0x11;
+        c.I = 0xAA;
+        c.opcode_FX29();
+        assert_eq!(c.I, 0x55);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX33() {
+        let mut c = init();
+        c.opcode = 0xFA33;
+        c.opcode_FX33();
+        assert_eq!(c.pc, 0x202);
+        // TODO do something
+    }
+
+    #[test]
+    fn opcode_FX55() {
+        let mut c = init();
+        c.opcode = 0xF433;
+        c.V[0] = 0x00;
+        c.V[1] = 0x11;
+        c.V[2] = 0x22;
+        c.V[3] = 0x33;
+        c.I = 0xAA;
+        c.memory[0xAA + 0x4] = 0xFF;
+
+        c.opcode_FX55();
+
+        assert_eq!(c.memory[0xAA + 0], 0x00);
+        assert_eq!(c.memory[0xAA + 1], 0x11);
+        assert_eq!(c.memory[0xAA + 2], 0x22);
+        assert_eq!(c.memory[0xAA + 3], 0x33);
+        assert_eq!(c.memory[0xAA + 4], 0xFF);
+        assert_eq!(c.I, 0xAA);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_FX65() {
+        let mut c = init();
+        c.opcode = 0xF433;
+        c.I = 0xAA;
+        c.memory[c.I as usize + 0] = 0x00;
+        c.memory[c.I as usize + 1] = 0x11;
+        c.memory[c.I as usize + 2] = 0x22;
+        c.memory[c.I as usize + 3] = 0x33;
+        c.V[0x4] = 0xFF;
+
+        c.opcode_FX65();
+
+        assert_eq!(c.V[0], 0x00);
+        assert_eq!(c.V[1], 0x11);
+        assert_eq!(c.V[2], 0x22);
+        assert_eq!(c.V[3], 0x33);
+        assert_eq!(c.V[4], 0xFF);
+        assert_eq!(c.I, 0xAA);
         assert_eq!(c.pc, 0x202);
     }
 
