@@ -39,7 +39,7 @@ pub struct Chip8 {
     delay_timer: u8, // timers -> goto zero
     sound_timer: u8, // when zero buzzer is triggered
 
-    key: [bool; 16],       // which key are pressed
+    pub key: [bool; 16],   // which key are pressed
     screen: [u8; 64 * 32], // pixel array
 
     draw: bool, // indicate if we should draw the screen

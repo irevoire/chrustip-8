@@ -18,7 +18,7 @@ impl Gfx {
             width,
             height,
             minifb::WindowOptions {
-                resize: false, // TODO allow resize
+                resize: true, // TODO allow resize
                 scale: minifb::Scale::X8,
                 ..minifb::WindowOptions::default()
             },
@@ -57,11 +57,51 @@ impl Gfx {
         self.current_time = Instant::now();
     }
 
+    /// do some sound
     pub fn sound(&self) {
-        // NOT IMPLEMENTED
+        // TODO better sound
+        println!("\x1ba"); // bell?
     }
 
-    pub fn handle_event(&mut self) {
-        // NOT IMPLEMENTED
+    /// update the array with the key currently pressed
+    pub fn update_key(&mut self, key: &mut [bool]) {
+        // clear all keys
+        for k in key.iter_mut() {
+            *k = false;
+        }
+        self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
+            for t in keys {
+                match t {
+                    Key::Key1 => key[0] = true,
+                    Key::Key2 => key[1] = true,
+                    Key::Key3 => key[4] = true,
+                    Key::Key4 => key[4] = true,
+                    Key::A => key[5] = true,
+                    Key::Z => key[6] = true,
+                    Key::E => key[7] = true,
+                    Key::R => key[8] = true,
+                    Key::Q => key[9] = true,
+                    Key::S => key[10] = true,
+                    Key::D => key[11] = true,
+                    Key::F => key[12] = true,
+                    Key::W => key[13] = true,
+                    Key::X => key[14] = true,
+                    Key::C => key[15] = true,
+                    Key::V => key[16] = true,
+                    _ => (),
+                }
+            }
+        });
+    }
+
+    /// update all related gfx event (window is closed, resized, whatevered)
+    /// if the program need to exit then this function return `true`
+    pub fn handle_event(&self) -> bool {
+        if !self.window.is_open() {
+            return true;
+        } else if self.window.is_key_down(Key::Escape) {
+            return true;
+        }
+        false
     }
 }

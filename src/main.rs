@@ -21,9 +21,17 @@ fn main() {
     }
 
     loop {
+        if gfx.handle_event() {
+            break;
+        }
+        gfx.update_key(&mut chip.key);
         chip.cycle();
+
         if let Some(screen) = chip.update() {
             gfx.update(screen);
+        }
+        if chip.sound() {
+            gfx.sound();
         }
     }
 }
