@@ -212,7 +212,7 @@ impl Chip8 {
     /// Skips the next instruction if VX equals NN.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_3XNN(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
         let NN = (self.opcode & 0x00FF) as u8;
 
         if self.V[X] == NN {
@@ -225,7 +225,7 @@ impl Chip8 {
     /// Skips the next instruction if VX doesn't equal NN.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_4XNN(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
         let NN = (self.opcode & 0x00FF) as u8;
 
         if self.V[X] != NN {
@@ -238,8 +238,8 @@ impl Chip8 {
     /// Skips the next instruction if VX equals VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_5XY0(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         if self.V[X] == self.V[Y] {
             self.pc += 4;
@@ -608,6 +608,62 @@ mod tests {
         );
         assert_eq!(c.sp, 1);
         assert_eq!(c.pc, 0xB0B);
+    }
+
+    #[test]
+    fn opcode_3XNN_false() {
+        let mut c = init();
+        c.opcode = 0x3ABB;
+        c.V[0xA] = 0xAA;
+        c.opcode_3XNN();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_3XNN_true() {
+        let mut c = init();
+        c.opcode = 0x3ABB;
+        c.V[0x0A] = 0xBB;
+        c.opcode_3XNN();
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_4XNN_false() {
+        let mut c = init();
+        c.opcode = 0x4ABB;
+        c.V[0xA] = 0xAA;
+        c.opcode_4XNN();
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_4XNN_true() {
+        let mut c = init();
+        c.opcode = 0x4ABB;
+        c.V[0x0A] = 0xBB;
+        c.opcode_4XNN();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_5XY0_false() {
+        let mut c = init();
+        c.opcode = 0x5AB0;
+        c.V[0xA] = 0xAA;
+        c.V[0xB] = 0xBB;
+        c.opcode_5XY0();
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_5XY0_true() {
+        let mut c = init();
+        c.opcode = 0x5AB0;
+        c.V[0xA] = 0xBB;
+        c.V[0xB] = 0xBB;
+        c.opcode_5XY0();
+        assert_eq!(c.pc, 0x204);
     }
 
     #[test]
