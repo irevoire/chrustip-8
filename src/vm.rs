@@ -65,18 +65,13 @@ impl Chip8 {
             chip.memory[i] = *v
         }
 
-        return chip;
+        chip
     }
 
+    /// Load the game into the chip-8 memory from 0x200 to the end of memory
     pub fn load_game(&mut self, file: &str) -> std::io::Result<()> {
-        const MAX_LEN: usize = 0xEA0 - 0x200;
         let mut file = File::open(file)?;
-        let mut buffer = [0; MAX_LEN];
-        file.read(&mut buffer[..])?;
-
-        for (i, v) in buffer.iter().enumerate() {
-            self.memory[(i + 0x200) as usize] = *v;
-        }
+        file.read(&mut self.memory[0x200..])?;
         Ok(())
     }
 
@@ -98,7 +93,7 @@ impl Chip8 {
     }
 
     fn handle_opcode(&mut self) {
-        let opcode = (self.memory[self.pc] as u16) << 8 | self.memory[self.pc + 1] as u16;
+        let opcode = ((self.memory[self.pc] as u16) << 8) | (self.memory[self.pc + 1] as u16);
         self.opcode = opcode.clone();
 
         if opcode == 0x00EE {
