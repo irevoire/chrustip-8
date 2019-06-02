@@ -185,23 +185,25 @@ impl Chip8 {
         }
     }
 
-    /// Calls RCA 1802 program at address NNN. Not necessary for most ROMs.
-    fn opcode_0NNN(&mut self) {
-        // NOT IMPLEMENTED
-    }
-
     /// Clears the screen.
     fn opcode_00E0(&mut self) {
         for p in self.screen.iter_mut() {
             *p = 0
         }
         self.gfx.clear();
+        self.pc += 2;
     }
 
     /// Returns from a subroutine.
     fn opcode_00EE(&mut self) {
         self.sp -= 1;
         self.pc = self.stack[self.sp];
+        self.pc += 2;
+    }
+
+    /// Calls RCA 1802 program at address NNN. Not necessary for most ROMs.
+    /// !!! **NOT IMPLEMENTED**  !!!
+    fn opcode_0NNN(&mut self) {
         self.pc += 2;
     }
 
@@ -417,7 +419,6 @@ impl Chip8 {
         let N = (self.opcode & 0x000F) as usize; // heigth
         let mut pixel: u16;
 
-        println!("update screen");
         self.V[0xF] = 0;
         for y in 0..N {
             pixel = self.memory[self.I as usize + y].into();
@@ -429,7 +430,6 @@ impl Chip8 {
                     if self.screen[pos] == 1 {
                         self.V[0xF] = 1
                     }
-                    println!("one pixel");
                     self.screen[pos] = !self.screen[pos];
                 }
             }
