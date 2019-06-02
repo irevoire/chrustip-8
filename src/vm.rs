@@ -354,17 +354,16 @@ impl Chip8 {
         let X = self.VX() as usize;
         let Y = self.VY() as usize;
         let N = self.N() as usize; // heigth
-        let mut pixel: u16;
 
         self.V[0xF] = 0;
         for y in 0..N {
-            pixel = self.memory[self.I as usize + y].into();
+            let pixel = self.memory[self.I as usize + y];
             for x in 0..8 {
-                if pixel & (0x80 >> x) != 0 {
+                if (pixel & (0x80 >> x)) != 0 {
                     let pos = (X + x + ((Y + y) * 64)) % 2048;
                     let pos = pos as usize;
 
-                    if self.screen[pos] == 1 {
+                    if self.screen[pos] != 0 {
                         self.V[0xF] = 1
                     }
                     self.screen[pos] = !self.screen[pos];
@@ -436,7 +435,7 @@ impl Chip8 {
     /// Sets I to the location of the sprite for the character in VX.
     /// Characters 0-F (in hexadecimal) are represented by a 4x5 font.
     fn opcode_FX29(&mut self) {
-        self.I = (self.VX() * 0x5) as u16; // TODO check for overflow?
+        self.I = self.VX().wrapping_mul(0x5).into();
         self.pc += 2;
     }
 
