@@ -475,7 +475,6 @@ impl Chip8 {
             self.memory[self.I as usize + i] = self.V[i];
         }
 
-        // self.I += X as u16 + 1; // "I is left unmodified"
         self.pc += 2;
     }
 
@@ -487,7 +486,6 @@ impl Chip8 {
             self.V[i as usize] = self.memory[self.I as usize + i];
         }
 
-        // self.I += X as u16 + 1; // "I is left unmodified"
         self.pc += 2;
     }
 }
