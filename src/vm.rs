@@ -94,78 +94,43 @@ impl Chip8 {
         let opcode = ((self.memory[self.pc] as u16) << 8) | (self.memory[self.pc + 1] as u16);
         self.opcode = opcode.clone();
 
-        if opcode == 0x00EE {
-            self.opcode_00EE()
-        } else if opcode == 0x00E0 {
-            self.opcode_00E0()
-        } else if (opcode & 0xF000) == 0x0000 {
-            self.opcode_0NNN()
-        } else if (opcode & 0xF000) == 0x1000 {
-            self.opcode_1NNN()
-        } else if (opcode & 0xF000) == 0x2000 {
-            self.opcode_2NNN()
-        } else if (opcode & 0xF000) == 0x3000 {
-            self.opcode_3XNN()
-        } else if (opcode & 0xF000) == 0x4000 {
-            self.opcode_4XNN()
-        } else if (opcode & 0xF00F) == 0x5000 {
-            self.opcode_5XY0()
-        } else if (opcode & 0xF000) == 0x6000 {
-            self.opcode_6XNN()
-        } else if (opcode & 0xF000) == 0x7000 {
-            self.opcode_7XNN()
-        } else if (opcode & 0xF00F) == 0x8000 {
-            self.opcode_8XY0()
-        } else if (opcode & 0xF00F) == 0x8001 {
-            self.opcode_8XY1()
-        } else if (opcode & 0xF00F) == 0x8002 {
-            self.opcode_8XY2()
-        } else if (opcode & 0xF00F) == 0x8003 {
-            self.opcode_8XY3()
-        } else if (opcode & 0xF00F) == 0x8004 {
-            self.opcode_8XY4()
-        } else if (opcode & 0xF00F) == 0x8005 {
-            self.opcode_8XY5()
-        } else if (opcode & 0xF00F) == 0x8006 {
-            self.opcode_8XY6()
-        } else if (opcode & 0xF00F) == 0x8007 {
-            self.opcode_8XY7()
-        } else if (opcode & 0xF00F) == 0x800E {
-            self.opcode_8XYE()
-        } else if (opcode & 0xF00F) == 0x9000 {
-            self.opcode_9XY0()
-        } else if (opcode & 0xF000) == 0xA000 {
-            self.opcode_ANNN()
-        } else if (opcode & 0xF000) == 0xB000 {
-            self.opcode_BNNN()
-        } else if (opcode & 0xF000) == 0xC000 {
-            self.opcode_CXNN()
-        } else if (opcode & 0xF000) == 0xD000 {
-            self.opcode_DXYN()
-        } else if (opcode & 0xF0FF) == 0xE09E {
-            self.opcode_EX9E()
-        } else if (opcode & 0xF0FF) == 0xE0A1 {
-            self.opcode_EXA1()
-        } else if (opcode & 0xF0FF) == 0xF007 {
-            self.opcode_FX07()
-        } else if (opcode & 0xF0FF) == 0xF00A {
-            self.opcode_FX0A()
-        } else if (opcode & 0xF0FF) == 0xF015 {
-            self.opcode_FX15()
-        } else if (opcode & 0xF0FF) == 0xF018 {
-            self.opcode_FX18()
-        } else if (opcode & 0xF0FF) == 0xF01E {
-            self.opcode_FX1E()
-        } else if (opcode & 0xF0FF) == 0xF029 {
-            self.opcode_FX29()
-        } else if (opcode & 0xF0FF) == 0xF033 {
-            self.opcode_FX33()
-        } else if (opcode & 0xF0FF) == 0xF055 {
-            self.opcode_FX55()
-        } else if (opcode & 0xF0FF) == 0xF065 {
-            self.opcode_FX65()
-        } else {
-            println!("Unknown opcode: 0x{:4X}", opcode);
+        match opcode {
+            _ if opcode == 0x00EE => self.opcode_00EE(),
+            _ if opcode == 0x00E0 => self.opcode_00E0(),
+            _ if (opcode & 0xF000) == 0x0000 => self.opcode_0NNN(),
+            _ if (opcode & 0xF000) == 0x1000 => self.opcode_1NNN(),
+            _ if (opcode & 0xF000) == 0x2000 => self.opcode_2NNN(),
+            _ if (opcode & 0xF000) == 0x3000 => self.opcode_3XNN(),
+            _ if (opcode & 0xF000) == 0x4000 => self.opcode_4XNN(),
+            _ if (opcode & 0xF00F) == 0x5000 => self.opcode_5XY0(),
+            _ if (opcode & 0xF000) == 0x6000 => self.opcode_6XNN(),
+            _ if (opcode & 0xF000) == 0x7000 => self.opcode_7XNN(),
+            _ if (opcode & 0xF00F) == 0x8000 => self.opcode_8XY0(),
+            _ if (opcode & 0xF00F) == 0x8001 => self.opcode_8XY1(),
+            _ if (opcode & 0xF00F) == 0x8002 => self.opcode_8XY2(),
+            _ if (opcode & 0xF00F) == 0x8003 => self.opcode_8XY3(),
+            _ if (opcode & 0xF00F) == 0x8004 => self.opcode_8XY4(),
+            _ if (opcode & 0xF00F) == 0x8005 => self.opcode_8XY5(),
+            _ if (opcode & 0xF00F) == 0x8006 => self.opcode_8XY6(),
+            _ if (opcode & 0xF00F) == 0x8007 => self.opcode_8XY7(),
+            _ if (opcode & 0xF00F) == 0x800E => self.opcode_8XYE(),
+            _ if (opcode & 0xF00F) == 0x9000 => self.opcode_9XY0(),
+            _ if (opcode & 0xF000) == 0xA000 => self.opcode_ANNN(),
+            _ if (opcode & 0xF000) == 0xB000 => self.opcode_BNNN(),
+            _ if (opcode & 0xF000) == 0xC000 => self.opcode_CXNN(),
+            _ if (opcode & 0xF000) == 0xD000 => self.opcode_DXYN(),
+            _ if (opcode & 0xF0FF) == 0xE09E => self.opcode_EX9E(),
+            _ if (opcode & 0xF0FF) == 0xE0A1 => self.opcode_EXA1(),
+            _ if (opcode & 0xF0FF) == 0xF007 => self.opcode_FX07(),
+            _ if (opcode & 0xF0FF) == 0xF00A => self.opcode_FX0A(),
+            _ if (opcode & 0xF0FF) == 0xF015 => self.opcode_FX15(),
+            _ if (opcode & 0xF0FF) == 0xF018 => self.opcode_FX18(),
+            _ if (opcode & 0xF0FF) == 0xF01E => self.opcode_FX1E(),
+            _ if (opcode & 0xF0FF) == 0xF029 => self.opcode_FX29(),
+            _ if (opcode & 0xF0FF) == 0xF033 => self.opcode_FX33(),
+            _ if (opcode & 0xF0FF) == 0xF055 => self.opcode_FX55(),
+            _ if (opcode & 0xF0FF) == 0xF065 => self.opcode_FX65(),
+            _ => println!("Unknown opcode: 0x{:4X}", opcode),
         }
     }
 
