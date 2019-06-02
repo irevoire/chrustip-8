@@ -15,7 +15,7 @@ impl Gfx {
             height,
             minifb::WindowOptions {
                 resize: false, // TODO allow resize
-                scale: minifb::Scale::X4,
+                scale: minifb::Scale::X8,
                 ..minifb::WindowOptions::default()
             },
         );
@@ -42,10 +42,6 @@ impl Gfx {
         for i in 0..arr.len() {
             // TODO UNSAFE
             let color = arr[i] as u32;
-            if color != 0 {
-                println!("There is a color");
-            }
-
             self.buffer[i] = (color << 24) | (color << 16) | (color << 8) | color;
         }
 
