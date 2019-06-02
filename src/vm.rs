@@ -250,7 +250,7 @@ impl Chip8 {
 
     /// Sets VX to NN.
     fn opcode_6XNN(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
         let NN = (self.opcode & 0x00FF) as u8;
 
         self.V[X] = NN;
@@ -259,7 +259,7 @@ impl Chip8 {
 
     /// Adds NN to VX. (Carry flag is not changed)
     fn opcode_7XNN(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
         let NN = (self.opcode & 0x00FF) as u8;
 
         self.V[X] = self.V[X].overflowing_add(NN).0;
@@ -268,8 +268,8 @@ impl Chip8 {
 
     /// Sets VX to the value of VY.
     fn opcode_8XY0(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         self.V[X] = self.V[Y];
         self.pc += 2;
@@ -277,8 +277,8 @@ impl Chip8 {
 
     /// Sets VX to VX or VY. (Bitwise OR operation)
     fn opcode_8XY1(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         self.V[X] |= self.V[Y];
         self.pc += 2;
@@ -286,8 +286,8 @@ impl Chip8 {
 
     /// Sets VX to VX and VY. (Bitwise AND operation)
     fn opcode_8XY2(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         self.V[X] &= self.V[Y];
         self.pc += 2;
@@ -295,8 +295,8 @@ impl Chip8 {
 
     /// Sets VX to VX xor VY.
     fn opcode_8XY3(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         self.V[X] ^= self.V[Y];
         self.pc += 2;
@@ -304,55 +304,66 @@ impl Chip8 {
 
     /// Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
     fn opcode_8XY4(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         let (res, carry) = self.V[X].overflowing_add(self.V[Y]);
         self.V[X] = res;
         if carry {
-            self.V[0xF] = 1
+            self.V[0xF] = 1;
+        } else {
+            self.V[0xF] = 0;
         }
         self.pc += 2;
     }
 
-    /// VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+    /// VY is subtracted from VX. VF is set to 0 when there's a borrow,
+    /// and 1 when there isn't.
     fn opcode_8XY5(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
 
         let (res, carry) = self.V[X].overflowing_sub(self.V[Y]);
         self.V[X] = res;
         if carry {
-            self.V[0xF] = 1
+            self.V[0xF] = 1;
+        } else {
+            self.V[0xF] = 0;
         }
+
         self.pc += 2;
     }
 
-    /// Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
+    /// Stores the least significant bit of VX in VF and then shifts VX
+    /// to the right by 1.
     fn opcode_8XY6(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         self.V[0xF] = self.V[X] & 0x1;
         self.V[X] >>= 1;
         self.pc += 2;
     }
 
-    /// Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+    /// Sets VX to VY minus VX. VF is set to 0 when there's a borrow,
+    /// and 1 when there isn't.
     fn opcode_8XY7(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
+        let Y = ((self.opcode & 0x00F0) >> 4) as usize;
         let (res, carry) = self.V[Y].overflowing_sub(self.V[X]);
 
         self.V[X] = res;
         if carry {
-            self.V[0xF] = 1
+            self.V[0xF] = 1;
+        } else {
+            self.V[0xF] = 0;
         }
+
         self.pc += 2;
     }
 
     /// Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
     fn opcode_8XYE(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
+        let X = ((self.opcode & 0x0F00) >> 8) as usize;
 
         self.V[0xF] = self.V[X] >> 7;
         self.V[X] <<= 1;
@@ -362,8 +373,8 @@ impl Chip8 {
     /// Skips the next instruction if VX doesn't equal VY.
     /// (Usually the next instruction is a jump to skip a code block)
     fn opcode_9XY0(&mut self) {
-        let X = (self.opcode & 0x0F00 >> 8) as usize;
-        let Y = (self.opcode & 0x00F0 >> 4) as usize;
+        let X = (self.opcode & 0x0F00) >> 8) as usize;
+        let Y = (self.opcode & 0x00F0) >> 4) as usize;
 
         if self.V[X] != self.V[Y] {
             self.pc += 4;
@@ -664,6 +675,227 @@ mod tests {
         c.V[0xB] = 0xBB;
         c.opcode_5XY0();
         assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_6XNN() {
+        let mut c = init();
+        c.opcode = 0x6ABB;
+        c.opcode_6XNN();
+        assert_eq!(c.V[0xA], 0xBB);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_7XNN() {
+        let mut c = init();
+        c.opcode = 0x7ABB;
+        c.V[0xA] = 0x11;
+        c.opcode_7XNN();
+        assert_eq!(c.V[0xA], 0xCC);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_7XNN_overflow() {
+        let mut c = init();
+        c.opcode = 0x7AEE;
+        c.V[0xA] = 0x12;
+        c.opcode_7XNN();
+        assert_eq!(c.V[0xA], 0x00);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY0() {
+        let mut c = init();
+        c.opcode = 0x8AB0;
+        c.V[0xA] = 0xAA;
+        c.V[0xB] = 0xBB;
+        c.opcode_8XY0();
+        assert_eq!(c.V[0xA], 0xBB);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY1() {
+        let mut c = init();
+        c.opcode = 0x8AB1;
+        c.V[0xA] = 0xAA;
+        c.V[0xB] = 0xBB;
+        c.opcode_8XY1();
+        assert_eq!(c.V[0xA], 0xAA | 0xBB);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY2() {
+        let mut c = init();
+        c.opcode = 0x8AB2;
+        c.V[0xA] = 0xEE;
+        c.V[0xB] = 0x55;
+        c.opcode_8XY2();
+        assert_eq!(c.V[0xA], 0xEE & 0x55);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY3() {
+        let mut c = init();
+        c.opcode = 0x8AB3;
+        c.V[0xA] = 0xEE;
+        c.V[0xB] = 0x55;
+        c.opcode_8XY3();
+        assert_eq!(c.V[0xA], 0xEE ^ 0x55);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY4() {
+        let mut c = init();
+        c.opcode = 0x8AB4;
+        c.V[0xA] = 0x11;
+        c.V[0xB] = 0xAA;
+        c.opcode_8XY4();
+        assert_eq!(c.V[0xA], 0xBB);
+        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY4_with_carry() {
+        let mut c = init();
+        c.opcode = 0x8AB4;
+        c.V[0xA] = 0x12;
+        c.V[0xB] = 0xFF;
+        c.opcode_8XY4();
+        assert_eq!(c.V[0xA], 0x11);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY4_with_and_without_carry() {
+        let mut c = init();
+        c.opcode = 0x8AB4;
+        c.V[0xA] = 0x12;
+        c.V[0xB] = 0xFF;
+        c.opcode_8XY4();
+        assert_eq!(c.V[0xA], 0x11);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+
+        c.V[0xB] = 0x22;
+        c.opcode_8XY4();
+        assert_eq!(c.V[0xA], 0x33);
+        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_8XY5() {
+        let mut c = init();
+        c.opcode = 0x8AB5;
+        c.V[0xA] = 0xAA;
+        c.V[0xB] = 0x11;
+        c.opcode_8XY5();
+        assert_eq!(c.V[0xA], 0x99);
+        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY5_with_carry() {
+        let mut c = init();
+        c.opcode = 0x8AB5;
+        c.V[0xA] = 0x10;
+        c.V[0xB] = 0x22;
+        c.opcode_8XY5();
+        assert_eq!(c.V[0xA], 0xEE);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY5_with_and_without_carry() {
+        let mut c = init();
+        c.opcode = 0x8AB5;
+        c.V[0xA] = 0x10;
+        c.V[0xB] = 0x22;
+        c.opcode_8XY5();
+        assert_eq!(c.V[0xA], 0xEE);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+
+        c.V[0xB] = 0x22;
+        c.opcode_8XY5();
+        assert_eq!(c.V[0xA], 0xCC);
+        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_8XY6() {
+        let mut c = init();
+        c.opcode = 0x8AB6;
+        c.V[0xA] = 0xFF;
+        c.opcode_8XY6();
+        assert_eq!(c.V[0xA], 0xFF >> 1);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY7() {
+        let mut c = init();
+        c.opcode = 0x8AB7;
+        c.V[0xA] = 0x11;
+        c.V[0xB] = 0xAA;
+        c.opcode_8XY7();
+        assert_eq!(c.V[0xA], 0x99);
+        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY7_with_carry() {
+        let mut c = init();
+        c.opcode = 0x8AB7;
+        c.V[0xA] = 0x22;
+        c.V[0xB] = 0x10;
+        c.opcode_8XY7();
+        assert_eq!(c.V[0xA], 0xEE);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+    }
+
+    #[test]
+    fn opcode_8XY7_with_and_without_carry() {
+        let mut c = init();
+        c.opcode = 0x8AB7;
+        c.V[0xA] = 0x22;
+        c.V[0xB] = 0x10;
+        c.opcode_8XY7();
+        assert_eq!(c.V[0xA], 0xEE);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
+
+        c.V[0xB] = 0xFF;
+        c.opcode_8XY7();
+        assert_eq!(c.V[0xA], 0x11);
+        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.pc, 0x204);
+    }
+
+    #[test]
+    fn opcode_8XYE() {
+        let mut c = init();
+        c.opcode = 0x8ABE;
+        c.V[0xA] = 0xEF;
+        c.opcode_8XYE();
+        assert_eq!(c.V[0xA], 0xEF << 1);
+        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.pc, 0x202);
     }
 
     #[test]
