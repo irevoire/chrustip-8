@@ -32,12 +32,6 @@ impl Gfx {
         return Ok(gfx);
     }
 
-    pub fn destroy(&self) {
-        // empty
-    }
-
-    pub fn clear(&mut self) {}
-
     pub fn update(&mut self, arr: &[u8]) {
         for i in 0..arr.len() {
             // TODO UNSAFE
