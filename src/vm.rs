@@ -462,7 +462,7 @@ impl Chip8 {
         let VX = self.VX();
 
         self.memory[(self.I) as usize] = VX / 100;
-        self.memory[(self.I + 1) as usize] = (VX / 10) % 10;
+        self.memory[(self.I + 1) as usize] = (VX % 100) / 10;
         self.memory[(self.I + 2) as usize] = VX % 100;
         self.pc += 2;
     }
