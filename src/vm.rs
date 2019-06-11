@@ -471,7 +471,7 @@ impl Chip8 {
     /// The offset from I is increased by 1 for each value written,
     /// but I itself is left unmodified.
     fn opcode_FX55(&mut self) {
-        for i in 0..self.X() {
+        for i in 0..=self.X() {
             self.memory[self.I as usize + i] = self.V[i];
         }
 
@@ -482,7 +482,7 @@ impl Chip8 {
     /// at address I. The offset from I is increased by 1 for each
     /// value written, but I itself is left unmodified.
     fn opcode_FX65(&mut self) {
-        for i in 0..self.X() {
+        for i in 0..=self.X() {
             self.V[i as usize] = self.memory[self.I as usize + i];
         }
 
@@ -1026,7 +1026,7 @@ mod tests {
     #[test]
     fn opcode_FX55() {
         let mut c = init();
-        c.opcode = 0xF433;
+        c.opcode = 0xF333;
         c.V[0] = 0x00;
         c.V[1] = 0x11;
         c.V[2] = 0x22;
@@ -1048,7 +1048,7 @@ mod tests {
     #[test]
     fn opcode_FX65() {
         let mut c = init();
-        c.opcode = 0xF433;
+        c.opcode = 0xF333;
         c.I = 0xAA;
         c.memory[c.I as usize + 0] = 0x00;
         c.memory[c.I as usize + 1] = 0x11;
