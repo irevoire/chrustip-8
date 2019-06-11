@@ -290,7 +290,7 @@ impl Chip8 {
 
         let (res, carry) = self.V[X].overflowing_sub(self.VY());
         self.V[X] = res;
-        self.V[0xF] = carry.into();
+        self.V[0xF] = (!carry).into();
         self.pc += 2;
     }
 
@@ -311,7 +311,7 @@ impl Chip8 {
         let (res, carry) = self.VY().overflowing_sub(self.V[X]);
 
         self.V[X] = res;
-        self.V[0xF] = carry.into();
+        self.V[0xF] = (!carry).into();
         self.pc += 2;
     }
 
@@ -731,7 +731,7 @@ mod tests {
         c.V[0xB] = 0x11;
         c.opcode_8XY5();
         assert_eq!(c.V[0xA], 0x99);
-        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.V[0xF], 0x01);
         assert_eq!(c.pc, 0x202);
     }
 
@@ -743,7 +743,7 @@ mod tests {
         c.V[0xB] = 0x22;
         c.opcode_8XY5();
         assert_eq!(c.V[0xA], 0xEE);
-        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.V[0xF], 0x00);
         assert_eq!(c.pc, 0x202);
     }
 
@@ -755,13 +755,13 @@ mod tests {
         c.V[0xB] = 0x22;
         c.opcode_8XY5();
         assert_eq!(c.V[0xA], 0xEE);
-        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.V[0xF], 0x00);
         assert_eq!(c.pc, 0x202);
 
         c.V[0xB] = 0x22;
         c.opcode_8XY5();
         assert_eq!(c.V[0xA], 0xCC);
-        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.V[0xF], 0x01);
         assert_eq!(c.pc, 0x204);
     }
 
@@ -784,7 +784,7 @@ mod tests {
         c.V[0xB] = 0xAA;
         c.opcode_8XY7();
         assert_eq!(c.V[0xA], 0x99);
-        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.V[0xF], 0x01);
         assert_eq!(c.pc, 0x202);
     }
 
@@ -796,7 +796,7 @@ mod tests {
         c.V[0xB] = 0x10;
         c.opcode_8XY7();
         assert_eq!(c.V[0xA], 0xEE);
-        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.V[0xF], 0x00);
         assert_eq!(c.pc, 0x202);
     }
 
@@ -808,13 +808,13 @@ mod tests {
         c.V[0xB] = 0x10;
         c.opcode_8XY7();
         assert_eq!(c.V[0xA], 0xEE);
-        assert_eq!(c.V[0xF], 0x01);
+        assert_eq!(c.V[0xF], 0x00);
         assert_eq!(c.pc, 0x202);
 
         c.V[0xB] = 0xFF;
         c.opcode_8XY7();
         assert_eq!(c.V[0xA], 0x11);
-        assert_eq!(c.V[0xF], 0x00);
+        assert_eq!(c.V[0xF], 0x01);
         assert_eq!(c.pc, 0x204);
     }
 
