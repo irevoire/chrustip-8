@@ -71,6 +71,7 @@ impl Gfx {
         }
         self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
             for t in keys {
+                // this is broken TODO
                 match t {
                     Key::Key1 => key[0] = true,
                     Key::Key2 => key[1] = true,
@@ -92,6 +93,9 @@ impl Gfx {
                 }
             }
         });
+        if key.iter().any(|e| *e) {
+            println!("FOUND A KEY");
+        }
     }
 
     /// update all related gfx event (window is closed, resized, whatevered)

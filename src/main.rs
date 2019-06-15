@@ -1,6 +1,10 @@
 use std::env;
 
-mod gfx;
+#[cfg(feature = "minifb")]
+mod minifb;
+#[cfg(feature = "minifb")]
+use crate::minifb::Gfx;
+
 mod vm;
 
 fn main() {
@@ -12,7 +16,7 @@ fn main() {
         }
     };
 
-    let mut gfx = gfx::Gfx::new(64, 32).unwrap();
+    let mut gfx = Gfx::new(64, 32).unwrap();
     let mut chip = vm::Chip8::new();
 
     if let Err(e) = chip.load_game(&filename) {

@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Thomas Campistron <irevoire@hotmail.fr>"]
 edition = "2018"
 
+[features]
+default = ["minifb"]
+
 [dependencies]
 rand = "*"
-minifb = "*"
+minifb = { version = "*", optional = true }
