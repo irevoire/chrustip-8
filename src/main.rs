@@ -1,9 +1,14 @@
 use std::env;
 
-#[cfg(feature = "minifb")]
+#[cfg(feature = "mini")]
 mod minifb;
-#[cfg(feature = "minifb")]
+#[cfg(feature = "mini")]
 use crate::minifb::Gfx;
+
+#[cfg(feature = "pancurses")]
+mod ncurses;
+#[cfg(feature = "pancurses")]
+use crate::ncurses::Gfx;
 
 mod vm;
 
