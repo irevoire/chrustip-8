@@ -8,6 +8,7 @@ This repository is splitted in multiple part:
 * **[chip8-cpu](chip8-cpu)**: Hold the code which simulate the chip-8 cpu with it's memory and registers
 * **[chip8-minifb](chip8-minifb)**: My first implementation. It mostly works but there is a bug when a game wait for an input. You can see this for example when running the [KALEID](games/KALEID) game.
 * **[chip8-ncurses](chip8-ncurses)**: My second implementation, it works in terminal. Getting any input is still shitty though.
+* **[chip8-sdl](chip8-sdl)**: It's slow af I don't know why.
 
 ## Requirement
 * rust
@@ -25,6 +26,8 @@ cargo build --release
 ```
 cargo build --release --bin [bin name] # chip8-minifb for example
 ```
+
+To get the name of all the possidle binary just write `cargo build --bin` without inputing anything after.
 
 ## Execute
 ```
