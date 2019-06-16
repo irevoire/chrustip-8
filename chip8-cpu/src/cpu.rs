@@ -341,7 +341,6 @@ impl Cpu {
             for x in 0..8 {
                 if (pixel & (0x80 >> x)) != 0 {
                     let pos = (X + x + ((Y + y) * 64)) % 2048;
-                    let pos = pos as usize;
 
                     if self.screen[pos] {
                         self.V[0xF] = 1
@@ -431,9 +430,9 @@ impl Cpu {
     fn opcode_FX33(&mut self) {
         let VX = self.VX();
 
-        self.memory[(self.I) as usize] = VX / 100;
-        self.memory[(self.I + 1) as usize] = (VX % 100) / 10;
-        self.memory[(self.I + 2) as usize] = VX % 10;
+        self.memory[self.I] = VX / 100;
+        self.memory[self.I + 1] = (VX % 100) / 10;
+        self.memory[self.I + 2] = VX % 10;
         self.pc += 2;
     }
 
@@ -453,7 +452,7 @@ impl Cpu {
     /// value written, but I itself is left unmodified.
     fn opcode_FX65(&mut self) {
         for i in 0..=self.X() {
-            self.V[i as usize] = self.memory[self.I as usize + i];
+            self.V[i] = self.memory[self.I as usize + i];
         }
 
         self.pc += 2;
@@ -1020,10 +1019,10 @@ mod tests {
         let mut c = init();
         c.opcode = 0xF333;
         c.I = 0xAA;
-        c.memory[c.I as usize + 0] = 0x00;
-        c.memory[c.I as usize + 1] = 0x11;
-        c.memory[c.I as usize + 2] = 0x22;
-        c.memory[c.I as usize + 3] = 0x33;
+        c.memory[c.I + 0] = 0x00;
+        c.memory[c.I + 1] = 0x11;
+        c.memory[c.I + 2] = 0x22;
+        c.memory[c.I + 3] = 0x33;
         c.V[0x4] = 0xFF;
 
         c.opcode_FX65();

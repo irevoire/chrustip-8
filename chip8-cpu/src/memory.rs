@@ -53,15 +53,24 @@ impl Memory {
 use std::ops::Index;
 use std::ops::IndexMut;
 
-impl Index<usize> for Memory {
-    type Output = u8;
-    fn index(&self, i: usize) -> &Self::Output {
-        &self.raw[i]
-    }
+macro_rules! impl_index_for {
+    ($t:ty) => {
+        impl Index<$t> for Memory {
+            type Output = u8;
+            fn index(&self, i: $t) -> &Self::Output {
+                &self.raw[i as usize]
+            }
+        }
+
+        impl IndexMut<$t> for Memory {
+            fn index_mut<'b>(&'b mut self, i: $t) -> &'b mut Self::Output {
+                &mut self.raw[i as usize]
+            }
+        }
+    };
 }
 
-impl IndexMut<usize> for Memory {
-    fn index_mut<'b>(&'b mut self, i: usize) -> &'b mut Self::Output {
-        &mut self.raw[i]
-    }
-}
+impl_index_for!(usize);
+impl_index_for!(u32);
+impl_index_for!(u16);
+impl_index_for!(u8);
