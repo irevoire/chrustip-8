@@ -2,37 +2,16 @@
 // function containing instruction will also trigger a warning
 #![allow(non_snake_case)]
 
+pub mod memory;
+
 use rand::Rng;
-use std::fs::File;
-use std::io::prelude::*;
-
-const MEMORY_SIZE: usize = 0x1000;
-
-const FONTSET: [u8; 5 * 16] = [
-    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-    0x20, 0x60, 0x20, 0x20, 0x70, // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80, // F
-];
 
 pub struct Chip8 {
-    opcode: u16,               // all the instruction are on two bytes
-    memory: [u8; MEMORY_SIZE], // 4ko for the chip8
-    V: [u8; 16],               // 15 register + one carry flag
-    I: u16,                    // index register
-    pc: usize,                 // program counter
+    opcode: u16,            // all the instruction are on two bytes
+    memory: memory::Memory, // RAM
+    V: [u8; 16],            // 15 register + one carry flag
+    I: u16,                 // index register
+    pc: usize,              // program counter
     stack: [usize; 16],
     sp: usize, // stack pointer
 
@@ -47,9 +26,9 @@ pub struct Chip8 {
 
 impl Chip8 {
     pub fn new() -> Chip8 {
-        let mut chip = Chip8 {
+        Chip8 {
             opcode: 0,
-            memory: [0; MEMORY_SIZE],
+            memory: memory::new(),
             V: [0; 16],
             I: 0,
             pc: 0x200,
@@ -63,20 +42,11 @@ impl Chip8 {
             screen: [0; 64 * 32],
 
             draw: true,
-        };
-
-        for (i, v) in FONTSET.iter().enumerate() {
-            chip.memory[i] = *v
         }
-
-        chip
     }
 
-    /// Load the game into the chip-8 memory from 0x200 to the end of memory
     pub fn load_game(&mut self, file: &str) -> std::io::Result<()> {
-        let mut file = File::open(file)?;
-        file.read(&mut self.memory[0x200..])?;
-        Ok(())
+        self.memory.load_game(file)
     }
 
     pub fn cycle(&mut self) {

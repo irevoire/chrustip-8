@@ -1,16 +1,2 @@
-[package]
-name = "chrustip-8"
-version = "0.1.0"
-authors = ["Thomas Campistron <irevoire@hotmail.fr>"]
-edition = "2018"
-
-[features]
-default = ["pancurses"]
-
-mini = ["minifb"]
-
-[dependencies]
-rand = "*"
-minifb = { version = "*", optional = true }
-pancurses = { version = "*", optional = true }
-ncurses-rs = { version = "*", optional = true }
+[workspace]
+members = ["chip8-cpu", "chip8-minifb", "chip8-ncurses"]

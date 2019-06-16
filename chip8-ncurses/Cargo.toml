@@ -1,0 +1,9 @@
+[package]
+name = "chip8-ncurses"
+version = "0.1.0"
+authors = ["Thomas Campistron <irevoire@hotmail.fr>"]
+edition = "2018"
+
+[dependencies]
+pancurses = "*"
+chip8-cpu = { path = "../chip8-cpu" }
