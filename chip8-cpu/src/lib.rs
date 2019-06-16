@@ -28,7 +28,7 @@ impl Chip8 {
     pub fn new() -> Chip8 {
         Chip8 {
             opcode: 0,
-            memory: memory::new(),
+            memory: memory::Memory::new(),
             V: [0; 16],
             I: 0,
             pc: 0x200,

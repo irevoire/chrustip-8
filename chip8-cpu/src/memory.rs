@@ -26,11 +26,6 @@ pub struct Memory {
     raw: [u8; MEMORY_SIZE], // 4ko
 }
 
-/// just a little Helper so I don't have to pub Memory
-pub fn new() -> Memory {
-    Memory::new()
-}
-
 impl Memory {
     /// initialize the memory of the chip-8
     /// create an empty array of 4ko (MEMORY_SIZE)
