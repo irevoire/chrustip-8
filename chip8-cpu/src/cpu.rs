@@ -406,9 +406,7 @@ impl Cpu {
 
     /// Adds VX to I.
     fn opcode_FX1E(&mut self) {
-        let (res, carry) = self.I.overflowing_add(self.VX() as u16);
-        self.I = res;
-        self.V[0xF] = carry.into();
+        self.I = self.I.wrapping_add(self.VX() as u16);
         self.pc += 2;
     }
 
