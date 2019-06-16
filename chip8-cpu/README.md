@@ -11,3 +11,5 @@ Also, since I know this code will mostly be read (if ever) by people learning ho
 ```
 cargo rustdoc --open -- --document-private-items
 ```
+
+The best documentation remains here: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#Fx1E
