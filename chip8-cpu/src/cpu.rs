@@ -47,8 +47,8 @@ impl Cpu {
     pub fn cycle(&mut self) {
         self.handle_opcode();
 
-        self.delay_timer = self.delay_timer.checked_sub(1).unwrap_or(0);
-        self.sound_timer = self.sound_timer.checked_sub(1).unwrap_or(0);
+        self.delay_timer = self.delay_timer.saturating_sub(1);
+        self.sound_timer = self.sound_timer.saturating_sub(1);
     }
 
     pub fn sound(&self) -> bool {
