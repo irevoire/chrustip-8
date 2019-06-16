@@ -2,7 +2,7 @@
 // function containing instruction will also trigger a warning
 #![allow(non_snake_case)]
 
-mod cpu;
+pub mod cpu;
 mod memory;
 
 /// return a new chip8 cpu

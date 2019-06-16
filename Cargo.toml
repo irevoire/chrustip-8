@@ -1,2 +1,2 @@
 [workspace]
-members = ["chip8-cpu", "chip8-minifb", "chip8-ncurses"]
+members = ["chip8-cpu", "chip8-minifb", "chip8-ncurses", "chip8-sdl"]
