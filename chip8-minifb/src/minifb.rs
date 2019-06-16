@@ -39,11 +39,13 @@ impl Gfx {
         return Ok(gfx);
     }
 
-    pub fn update(&mut self, arr: &[u8]) {
+    pub fn update(&mut self, arr: &[bool]) {
         for i in 0..arr.len() {
             // TODO UNSAFE
-            let color = arr[i] as u32;
-            self.buffer[i] = (color << 24) | (color << 16) | (color << 8) | color;
+            self.buffer[i] = match arr[i] {
+                true => 0xFFe6FFFF,
+                false => 0xFF32321e,
+            }
         }
 
         match self.frequency.checked_sub(self.current_time.elapsed()) {

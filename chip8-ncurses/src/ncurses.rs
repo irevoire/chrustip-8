@@ -28,7 +28,7 @@ impl Gfx {
         })
     }
 
-    pub fn update(&mut self, arr: &[u8]) {
+    pub fn update(&mut self, arr: &[bool]) {
         match self.frequency.checked_sub(self.current_time.elapsed()) {
             None => 42, // we are slow
             Some(t) => pancurses::napms(t.as_millis() as i32),
@@ -38,11 +38,10 @@ impl Gfx {
         self.window.draw_box('|', '-');
         for y in 0..self.height {
             for x in 0..self.width {
-                if arr[x + y * self.width] == 0 {
-                    self.window.mvaddch(y as i32 + 1, x as i32 + 1, ' ');
-                } else {
-                    self.window.mvaddch(y as i32 + 1, x as i32 + 1, 'X');
-                }
+                match arr[x + y * self.width] {
+                    true => self.window.mvaddch(y as i32 + 1, x as i32 + 1, 'X'),
+                    false => self.window.mvaddch(y as i32 + 1, x as i32 + 1, ' '),
+                };
             }
         }
         self.window.refresh();

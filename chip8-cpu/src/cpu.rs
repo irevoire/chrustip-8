@@ -13,8 +13,8 @@ pub struct Cpu {
     delay_timer: u8, // timers -> goto zero
     sound_timer: u8, // when zero buzzer is triggered
 
-    pub key: [bool; 16],   // which key are pressed
-    screen: [u8; 64 * 32], // pixel array
+    pub key: [bool; 16],     // which key are pressed
+    screen: [bool; 64 * 32], // pixel array
 
     draw: bool, // indicate if we should draw the screen
 }
@@ -34,7 +34,7 @@ impl Cpu {
             sound_timer: 0,
 
             key: [false; 16],
-            screen: [0; 64 * 32],
+            screen: [false; 64 * 32],
 
             draw: true,
         }
@@ -55,7 +55,7 @@ impl Cpu {
         self.sound_timer == 1
     }
 
-    pub fn update(&mut self) -> Option<&[u8]> {
+    pub fn update(&mut self) -> Option<&[bool]> {
         let draw = self.draw;
         self.draw = false;
         match draw {
@@ -146,7 +146,7 @@ impl Cpu {
     /// Clears the screen.
     fn opcode_00E0(&mut self) {
         for p in self.screen.iter_mut() {
-            *p = 0
+            *p = false;
         }
         self.pc += 2;
         self.draw = true;
@@ -343,7 +343,7 @@ impl Cpu {
                     let pos = (X + x + ((Y + y) * 64)) % 2048;
                     let pos = pos as usize;
 
-                    if self.screen[pos] != 0 {
+                    if self.screen[pos] {
                         self.V[0xF] = 1
                     }
                     self.screen[pos] = !self.screen[pos];
