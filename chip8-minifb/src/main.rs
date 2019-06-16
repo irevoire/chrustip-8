@@ -13,7 +13,7 @@ fn main() {
     };
 
     let mut gfx = Gfx::new(64, 32).unwrap();
-    let mut chip = chip8_cpu::Chip8::new();
+    let mut chip = chip8_cpu::new();
 
     if let Err(e) = chip.load_game(&filename) {
         println!("Can't load game : {}", e);
