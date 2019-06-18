@@ -38,6 +38,7 @@ pub fn init_sdl(width: u32, height: u32) -> Gfx {
 }
 
 impl Gfx {
+    /// update the screen with the data in the chip8
     pub fn update_screen(&mut self, chip: &mut chip8_cpu::cpu::Cpu) {
         if let Some(screen) = chip.update() {
             self.canvas.set_draw_color(Color::RGB(50, 50, 30));
@@ -50,6 +51,7 @@ impl Gfx {
         }
     }
 
+    /// create a bunch of point to represent the chip8 screen
     fn render_game_screen(&mut self, arr: &[bool]) {
         let (width, height) = (64, 32);
         // EXTRA UNSAFE
@@ -66,6 +68,8 @@ impl Gfx {
         }
     }
 
+    /// check which keys were pressed
+    /// return true if the user want to exit
     pub fn handle_event(&mut self, keys: &mut [bool]) -> bool {
         // clear all keys
         for k in keys.iter_mut() {
