@@ -53,19 +53,17 @@ impl Gfx {
 
     /// create a bunch of point to represent the chip8 screen
     fn render_game_screen(&mut self, arr: &[bool]) {
-        let (width, height) = (64, 32);
         // EXTRA UNSAFE
-        for y in 0..height {
-            for x in 0..width {
-                match arr[x + y * width] {
-                    true => self
-                        .canvas
-                        .draw_point(Point::new(x as i32, y as i32))
-                        .unwrap(),
-                    false => continue,
-                };
-            }
-        }
+        let (width, height) = (64, 32);
+        let points = (0..height)
+            .flat_map(|y| {
+                (0..width).filter_map(move |x| match arr[x + y * width] {
+                    true => Some(Point::new(x as i32, y as i32)),
+                    false => None,
+                })
+            })
+            .collect::<Vec<Point>>();
+        self.canvas.draw_points(&points[..]).unwrap();
     }
 
     /// check which keys were pressed
