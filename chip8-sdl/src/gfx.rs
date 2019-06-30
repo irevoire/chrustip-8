@@ -3,8 +3,12 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::{rect::Point, video, EventPump, Sdl};
+use std::thread::sleep;
+use std::time::{Duration, Instant};
 
 pub struct Gfx {
+    frequency: Duration,
+    current_time: Instant,
     pub context: Sdl,
     pub canvas: Canvas<video::Window>,
     event_pump: EventPump,
@@ -31,6 +35,8 @@ pub fn init_sdl(width: u32, height: u32) -> Gfx {
     let event_pump = context.event_pump().unwrap();
 
     Gfx {
+        frequency: Duration::from_secs(1).checked_div(60).unwrap(),
+        current_time: Instant::now(),
         context,
         canvas,
         event_pump,
@@ -48,6 +54,12 @@ impl Gfx {
             self.render_game_screen(screen);
 
             self.canvas.present();
+
+            match self.frequency.checked_sub(self.current_time.elapsed()) {
+                None => println!("We are SLOW!"),
+                Some(t) => sleep(t),
+            }
+            self.current_time = Instant::now();
         }
     }
 

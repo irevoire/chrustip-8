@@ -1,6 +1,4 @@
 use std::env;
-use std::thread::sleep;
-use std::time::{Duration, Instant};
 
 mod gfx;
 
@@ -21,21 +19,13 @@ pub fn main() {
     }
 
     let mut gfx = gfx::init_sdl(960, 480);
-    let frequency = Duration::from_secs(1).checked_div(60).unwrap();
 
     loop {
-        let current_time = Instant::now();
-
         gfx.update_screen(&mut chip);
         if gfx.handle_event(&mut chip.key) {
             break;
         }
 
         chip.cycle();
-
-        match frequency.checked_sub(current_time.elapsed()) {
-            None => println!("We are SLOW!"),
-            Some(t) => sleep(t),
-        }
     }
 }
