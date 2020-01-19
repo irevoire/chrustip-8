@@ -5,5 +5,5 @@ authors = ["Thomas Campistron <irevoire@hotmail.fr>"]
 edition = "2018"
 
 [dependencies]
-minifb = "*"
+minifb = "0.15.1"
 chip8-cpu = { path = "../chip8-cpu" }

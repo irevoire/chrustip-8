@@ -1,10 +1,8 @@
 use minifb::{Key, KeyRepeat};
-use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 pub struct Gfx {
     window: minifb::Window,
-    frequency: Duration,
     current_time: Instant,
     width: usize,
     height: usize,
@@ -26,10 +24,11 @@ impl Gfx {
         if let Err(e) = window {
             return Err(format!("Unable to create window {}", e));
         };
+        let mut window = window.unwrap();
+        // we want 60 frames per seconds
+        window.limit_update_rate(Some(Duration::from_secs(1).checked_div(60).unwrap()));
         let gfx = Gfx {
-            window: window.unwrap(),
-            // we want 60 frames per seconds
-            frequency: Duration::from_secs(1).checked_div(60).unwrap(),
+            window,
             current_time: Instant::now(),
             width,
             height,
@@ -48,12 +47,8 @@ impl Gfx {
             }
         }
 
-        match self.frequency.checked_sub(self.current_time.elapsed()) {
-            None => println!("We are SLOW!"),
-            Some(t) => sleep(t),
-        }
         self.window
-            .update_with_buffer(&self.buffer)
+            .update_with_buffer(&self.buffer, self.width, self.height)
             .unwrap_or_else(|e| println!("Window update failed: {}", e));
 
         self.current_time = Instant::now();
@@ -95,9 +90,6 @@ impl Gfx {
                 }
             }
         });
-        if key.iter().any(|e| *e) {
-            println!("FOUND A KEY");
-        }
     }
 
     /// update all related gfx event (window is closed, resized, whatevered)
