@@ -1,7 +1,7 @@
 use std::env;
 
-mod minifb;
-use crate::minifb::Gfx;
+mod gfx;
+use crate::gfx::Gfx;
 
 fn main() {
     let filename = match env::args().nth(1) {
