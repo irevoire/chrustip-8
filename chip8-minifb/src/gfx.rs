@@ -66,30 +66,32 @@ impl Gfx {
         for k in key.iter_mut() {
             *k = false;
         }
-        self.window.get_keys_pressed(KeyRepeat::Yes).map(|keys| {
-            for t in keys {
-                // this is broken TODO
-                match t {
-                    Key::Key1 => key[0] = true,
-                    Key::Key2 => key[1] = true,
-                    Key::Key3 => key[2] = true,
-                    Key::Key4 => key[3] = true,
-                    Key::A => key[4] = true,
-                    Key::Z => key[5] = true,
-                    Key::E => key[6] = true,
-                    Key::R => key[7] = true,
-                    Key::Q => key[8] = true,
-                    Key::S => key[9] = true,
-                    Key::D => key[10] = true,
-                    Key::F => key[11] = true,
-                    Key::W => key[12] = true,
-                    Key::X => key[13] = true,
-                    Key::C => key[14] = true,
-                    Key::V => key[15] = true,
-                    _ => (),
-                }
-            }
-        });
+        self.window
+            .get_keys_pressed(KeyRepeat::Yes)
+            .unwrap()
+            .iter()
+            .for_each(|keys| match keys {
+                Key::Key1 => key[0x1] = true,
+                Key::Key2 => key[0x2] = true,
+                Key::Key3 => key[0x3] = true,
+                Key::Key4 => key[0xC] = true,
+
+                Key::Q => key[0x4] = true,
+                Key::W => key[0x5] = true,
+                Key::E => key[0x6] = true,
+                Key::R => key[0xD] = true,
+
+                Key::A => key[0x7] = true,
+                Key::S => key[0x8] = true,
+                Key::D => key[0x9] = true,
+                Key::F => key[0xE] = true,
+
+                Key::Z => key[0xA] = true,
+                Key::X => key[0x0] = true,
+                Key::C => key[0xB] = true,
+                Key::V => key[0xF] = true,
+                _ => (),
+            });
     }
 
     /// update all related gfx event (window is closed, resized, whatevered)
