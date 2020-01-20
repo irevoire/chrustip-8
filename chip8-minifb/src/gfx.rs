@@ -62,10 +62,6 @@ impl Gfx {
 
     /// update the array with the key currently pressed
     pub fn update_key(&mut self, key: &mut [bool]) {
-        // clear all keys
-        for k in key.iter_mut() {
-            *k = false;
-        }
         self.window
             .get_keys_pressed(KeyRepeat::Yes)
             .unwrap()
@@ -92,6 +88,13 @@ impl Gfx {
                 Key::V => key[0xF] = true,
                 _ => (),
             });
+    }
+
+    /// reset all keys in the array to false
+    pub fn clear_key(key: &mut [bool]) {
+        for k in key.iter_mut() {
+            *k = false;
+        }
     }
 
     /// update all related gfx event (window is closed, resized, whatevered)

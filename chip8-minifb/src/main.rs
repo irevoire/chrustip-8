@@ -1,4 +1,5 @@
 use std::env;
+use std::time::{Duration, Instant};
 
 mod gfx;
 use crate::gfx::Gfx;
@@ -20,18 +21,29 @@ fn main() {
         return;
     }
 
+    let mut last_instruction_run_time = Instant::now();
+    let mut updated = 0;
     loop {
         if gfx.handle_event() {
             break;
         }
         gfx.update_key(&mut chip.key);
-        chip.cycle();
 
-        if let Some(screen) = chip.update() {
-            gfx.update(screen);
-        }
-        if chip.sound() {
-            gfx.sound();
+        if last_instruction_run_time.elapsed() > Duration::from_millis(5) {
+            last_instruction_run_time = Instant::now();
+            chip.cycle();
+
+            if let Some(screen) = chip.update() {
+                updated += 1;
+                gfx.update(screen);
+            }
+            if updated > 3 {
+                updated = 0; // reset the keys every 3 frames
+                Gfx::clear_key(&mut chip.key);
+            }
+            if chip.sound() {
+                gfx.sound();
+            }
         }
     }
 }

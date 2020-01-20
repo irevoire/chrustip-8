@@ -360,6 +360,7 @@ impl Cpu {
             true => self.pc += 4,
             false => self.pc += 2,
         }
+        self.key[self.VX() as usize] = false;
     }
 
     /// Skips the next instruction if the key stored in VX isn't pressed.
@@ -369,6 +370,7 @@ impl Cpu {
             true => self.pc += 2,
             false => self.pc += 4,
         }
+        self.key[self.VX() as usize] = false;
     }
 
     /// Sets VX to the value of the delay timer.
@@ -382,8 +384,9 @@ impl Cpu {
     /// This is implemented by NOT incrementing the program counter (pc)
     /// so when getting the new opcode we'll re-execute this instruction
     fn opcode_FX0A(&mut self) {
-        for (idx, key) in self.key.iter().enumerate() {
+        for (idx, key) in self.key.iter_mut().enumerate() {
             if *key {
+                *key = false;
                 self.V[self.X()] = idx as u8;
                 self.pc += 2;
                 return;
