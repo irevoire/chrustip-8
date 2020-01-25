@@ -1,4 +1,5 @@
 use crate::memory;
+use bitmatch::bitmatch;
 use rand::Rng;
 
 pub struct Cpu {
@@ -64,84 +65,51 @@ impl Cpu {
         }
     }
 
+    #[bitmatch]
     fn handle_opcode(&mut self) {
         let opcode = ((self.memory[self.pc] as u16) << 8) | (self.memory[self.pc + 1] as u16);
         self.opcode = opcode;
 
-        match (
-            (opcode & 0xF000) >> 12,
-            (opcode & 0x0F00) >> 8,
-            (opcode & 0x00F0) >> 4,
-            opcode & 0x000F,
-        ) {
-            (0x0, 0x0, 0xE, 0xE) => self.opcode_00EE(),
-            (0x0, 0x0, 0xE, 0x0) => self.opcode_00E0(),
-            (0x0, _, _, _) => self.opcode_0NNN(),
-            (0x1, _, _, _) => self.opcode_1NNN(),
-            (0x2, _, _, _) => self.opcode_2NNN(),
-            (0x3, _, _, _) => self.opcode_3XNN(),
-            (0x4, _, _, _) => self.opcode_4XNN(),
-            (0x5, _, _, 0x0) => self.opcode_5XY0(),
-            (0x6, _, _, _) => self.opcode_6XNN(),
-            (0x7, _, _, _) => self.opcode_7XNN(),
-            (0x8, _, _, 0x0) => self.opcode_8XY0(),
-            (0x8, _, _, 0x1) => self.opcode_8XY1(),
-            (0x8, _, _, 0x2) => self.opcode_8XY2(),
-            (0x8, _, _, 0x3) => self.opcode_8XY3(),
-            (0x8, _, _, 0x4) => self.opcode_8XY4(),
-            (0x8, _, _, 0x5) => self.opcode_8XY5(),
-            (0x8, _, _, 0x6) => self.opcode_8XY6(),
-            (0x8, _, _, 0x7) => self.opcode_8XY7(),
-            (0x8, _, _, 0xE) => self.opcode_8XYE(),
-            (0x9, _, _, 0x0) => self.opcode_9XY0(),
-            (0xA, _, _, _) => self.opcode_ANNN(),
-            (0xB, _, _, _) => self.opcode_BNNN(),
-            (0xC, _, _, _) => self.opcode_CXNN(),
-            (0xD, _, _, _) => self.opcode_DXYN(),
-            (0xE, _, 0x9, 0xE) => self.opcode_EX9E(),
-            (0xE, _, 0xA, 0x1) => self.opcode_EXA1(),
-            (0xF, _, 0x0, 0x7) => self.opcode_FX07(),
-            (0xF, _, 0x0, 0xA) => self.opcode_FX0A(),
-            (0xF, _, 0x1, 0x5) => self.opcode_FX15(),
-            (0xF, _, 0x1, 0x8) => self.opcode_FX18(),
-            (0xF, _, 0x1, 0xE) => self.opcode_FX1E(),
-            (0xF, _, 0x2, 0x9) => self.opcode_FX29(),
-            (0xF, _, 0x3, 0x3) => self.opcode_FX33(),
-            (0xF, _, 0x5, 0x5) => self.opcode_FX55(),
-            (0xF, _, 0x6, 0x5) => self.opcode_FX65(),
-            (a, b, c, d) => println!("Unknown opcode: 0x{}{}{}{}", a, b, c, d),
+        #[bitmatch]
+        match opcode {
+            "0000_0000_1110_1110" => self.opcode_00EE(),
+            "0000_0000_1110_0000" => self.opcode_00E0(),
+            "0000_nnnn_nnnn_nnnn" => self.opcode_0NNN(n),
+            "0001_nnnn_nnnn_nnnn" => self.opcode_1NNN(n.into()),
+            "0010_nnnn_nnnn_nnnn" => self.opcode_2NNN(n.into()),
+            "0011_xxxx_nnnn_nnnn" => self.opcode_3XNN(x.into(), n as u8),
+            "0100_xxxx_nnnn_nnnn" => self.opcode_4XNN(x.into(), n as u8),
+            "0101_xxxx_yyyy_0000" => self.opcode_5XY0(x.into(), y.into()),
+            "0110_xxxx_nnnn_nnnn" => self.opcode_6XNN(x.into(), n as u8),
+            "0111_xxxx_nnnn_nnnn" => self.opcode_7XNN(x.into(), n as u8),
+            "1000_xxxx_yyyy_0000" => self.opcode_8XY0(x.into(), y.into()),
+            "1000_xxxx_yyyy_0001" => self.opcode_8XY1(x.into(), y.into()),
+            "1000_xxxx_yyyy_0010" => self.opcode_8XY2(x.into(), y.into()),
+            "1000_xxxx_yyyy_0011" => self.opcode_8XY3(x.into(), y.into()),
+            "1000_xxxx_yyyy_0100" => self.opcode_8XY4(x.into(), y.into()),
+            "1000_xxxx_yyyy_0101" => self.opcode_8XY5(x.into(), y.into()),
+            "1000_xxxx_yyyy_0110" => self.opcode_8XY6(x.into(), y.into()),
+            "1000_xxxx_yyyy_0111" => self.opcode_8XY7(x.into(), y.into()),
+            "1000_xxxx_yyyy_1110" => self.opcode_8XYE(x.into(), y.into()),
+            "1001_xxxx_yyyy_0000" => self.opcode_9XY0(x.into(), y.into()),
+            "1010_nnnn_nnnn_nnnn" => self.opcode_ANNN(n.into()),
+            "1011_nnnn_nnnn_nnnn" => self.opcode_BNNN(n.into()),
+            "1100_xxxx_nnnn_nnnn" => self.opcode_CXNN(x.into(), n as u8),
+            "1101_xxxx_yyyy_nnnn" => self.opcode_DXYN(x.into(), y.into(), n.into()),
+            "1110_xxxx_1001_1110" => self.opcode_EX9E(x.into()),
+            "1110_xxxx_1010_0001" => self.opcode_EXA1(x.into()),
+            "1111_xxxx_0000_0111" => self.opcode_FX07(x.into()),
+            "1111_xxxx_0000_1010" => self.opcode_FX0A(x.into()),
+            "1111_xxxx_0001_0101" => self.opcode_FX15(x.into()),
+            "1111_xxxx_0001_1000" => self.opcode_FX18(x.into()),
+            "1111_xxxx_0001_1110" => self.opcode_FX1E(x.into()),
+            "1111_xxxx_0010_1001" => self.opcode_FX29(x.into()),
+            "1111_xxxx_0011_0011" => self.opcode_FX33(x.into()),
+            "1111_xxxx_0101_0101" => self.opcode_FX55(x.into()),
+            "1111_xxxx_0110_0101" => self.opcode_FX65(x.into()),
+            "aaaa_aaaa_aaaa_aaaa" => panic!("Unknown instruction: {}", a),
         }
     }
-
-    fn NNN(&self) -> u16 {
-        (self.opcode & 0x0FFF).into()
-    }
-
-    fn NN(&self) -> u8 {
-        (self.opcode & 0x00FF) as u8
-    }
-
-    fn N(&self) -> u8 {
-        (self.opcode & 0x000F) as u8
-    }
-
-    fn X(&self) -> usize {
-        ((self.opcode & 0x0F00) >> 8).into()
-    }
-
-    fn Y(&self) -> usize {
-        ((self.opcode & 0x00F0) >> 4).into()
-    }
-
-    fn VX(&self) -> u8 {
-        self.V[self.X()]
-    }
-
-    fn VY(&self) -> u8 {
-        self.V[self.Y()]
-    }
-
-    /// ## INSTRUCTION
 
     /// Clears the screen.
     fn opcode_00E0(&mut self) {
@@ -161,26 +129,26 @@ impl Cpu {
 
     /// Calls RCA 1802 program at address NNN. Not necessary for most ROMs.
     /// !!! **NOT IMPLEMENTED**  !!!
-    fn opcode_0NNN(&mut self) {
+    fn opcode_0NNN(&mut self, _n: u16) {
         self.pc += 2;
     }
 
     /// Jumps to address NNN.
-    fn opcode_1NNN(&mut self) {
-        self.pc = self.NNN().into();
+    fn opcode_1NNN(&mut self, n: usize) {
+        self.pc = n;
     }
 
     /// Calls subroutine at NNN.
-    fn opcode_2NNN(&mut self) {
+    fn opcode_2NNN(&mut self, n: usize) {
         self.stack[self.sp] = self.pc;
         self.sp += 1;
-        self.pc = self.NNN().into();
+        self.pc = n;
     }
 
     /// Skips the next instruction if VX equals NN.
     /// (Usually the next instruction is a jump to skip a code block)
-    fn opcode_3XNN(&mut self) {
-        match self.VX() == self.NN() {
+    fn opcode_3XNN(&mut self, x: usize, n: u8) {
+        match self.V[x] == n {
             true => self.pc += 4,
             false => self.pc += 2,
         }
@@ -188,8 +156,8 @@ impl Cpu {
 
     /// Skips the next instruction if VX doesn't equal NN.
     /// (Usually the next instruction is a jump to skip a code block)
-    fn opcode_4XNN(&mut self) {
-        match self.VX() != self.NN() {
+    fn opcode_4XNN(&mut self, x: usize, n: u8) {
+        match self.V[x] != n {
             true => self.pc += 4,
             false => self.pc += 2,
         }
@@ -197,130 +165,119 @@ impl Cpu {
 
     /// Skips the next instruction if VX equals VY.
     /// (Usually the next instruction is a jump to skip a code block)
-    fn opcode_5XY0(&mut self) {
-        match self.VX() == self.VY() {
+    fn opcode_5XY0(&mut self, x: usize, y: usize) {
+        match self.V[x] == self.V[y] {
             true => self.pc += 4,
             false => self.pc += 2,
         }
     }
 
     /// Sets VX to NN.
-    fn opcode_6XNN(&mut self) {
-        self.V[self.X()] = self.NN();
+    fn opcode_6XNN(&mut self, x: usize, n: u8) {
+        self.V[x] = n;
         self.pc += 2;
     }
 
     /// Adds NN to VX. (Carry flag is not changed)
-    fn opcode_7XNN(&mut self) {
-        let X = self.X();
-
-        self.V[X] = self.V[X].wrapping_add(self.NN());
+    fn opcode_7XNN(&mut self, x: usize, n: u8) {
+        self.V[x] = self.V[x].wrapping_add(n);
         self.pc += 2;
     }
 
     /// Sets VX to the value of VY.
-    fn opcode_8XY0(&mut self) {
-        self.V[self.X()] = self.VY();
+    fn opcode_8XY0(&mut self, x: usize, y: usize) {
+        self.V[x] = self.V[y];
         self.pc += 2;
     }
 
     /// Sets VX to VX or VY. (Bitwise OR operation)
-    fn opcode_8XY1(&mut self) {
-        self.V[self.X()] |= self.VY();
+    fn opcode_8XY1(&mut self, x: usize, y: usize) {
+        self.V[x] |= self.V[y];
         self.pc += 2;
     }
 
     /// Sets VX to VX and VY. (Bitwise AND operation)
-    fn opcode_8XY2(&mut self) {
-        self.V[self.X()] &= self.VY();
+    fn opcode_8XY2(&mut self, x: usize, y: usize) {
+        self.V[x] &= self.V[y];
         self.pc += 2;
     }
 
     /// Sets VX to VX xor VY.
-    fn opcode_8XY3(&mut self) {
-        self.V[self.X()] ^= self.VY();
+    fn opcode_8XY3(&mut self, x: usize, y: usize) {
+        self.V[x] ^= self.V[y];
         self.pc += 2;
     }
 
     /// Adds VY to VX.
     /// VF is set to 1 when there's a carry, and to 0 when there isn't.
-    fn opcode_8XY4(&mut self) {
-        let X = self.X();
-
-        let (res, carry) = self.V[X].overflowing_add(self.VY());
-        self.V[X] = res;
+    fn opcode_8XY4(&mut self, x: usize, y: usize) {
+        let (res, carry) = self.V[x].overflowing_add(self.V[y]);
+        self.V[x] = res;
         self.V[0xF] = carry.into();
         self.pc += 2;
     }
 
     /// VY is subtracted from VX. VF is set to 0 when there's a borrow,
     /// and 1 when there isn't.
-    fn opcode_8XY5(&mut self) {
-        let X = self.X();
-
-        let (res, carry) = self.V[X].overflowing_sub(self.VY());
-        self.V[X] = res;
+    fn opcode_8XY5(&mut self, x: usize, y: usize) {
+        let (res, carry) = self.V[x].overflowing_sub(self.V[y]);
+        self.V[x] = res;
         self.V[0xF] = (!carry).into();
         self.pc += 2;
     }
 
     /// Stores the least significant bit of VX in VF and then shifts VX
     /// to the right by 1.
-    fn opcode_8XY6(&mut self) {
-        let X = self.X();
-
-        self.V[0xF] = self.V[X] & 0x1;
-        self.V[X] >>= 1;
+    fn opcode_8XY6(&mut self, x: usize, _y: usize) {
+        self.V[0xF] = self.V[x] & 0x1;
+        self.V[x] >>= 1;
         self.pc += 2;
     }
 
     /// Sets VX to VY minus VX. VF is set to 0 when there's a borrow,
     /// and 1 when there isn't.
-    fn opcode_8XY7(&mut self) {
-        let X = self.X();
-        let (res, carry) = self.VY().overflowing_sub(self.V[X]);
+    fn opcode_8XY7(&mut self, x: usize, y: usize) {
+        let (res, carry) = self.V[y].overflowing_sub(self.V[x]);
 
-        self.V[X] = res;
+        self.V[x] = res;
         self.V[0xF] = (!carry).into();
         self.pc += 2;
     }
 
     /// Stores the most significant bit of VX in VF and then shifts
     /// VX to the left by 1.
-    fn opcode_8XYE(&mut self) {
-        let X = self.X();
-
-        self.V[0xF] = self.V[X] >> 7;
-        self.V[X] <<= 1;
+    fn opcode_8XYE(&mut self, x: usize, _y: usize) {
+        self.V[0xF] = self.V[x] >> 7;
+        self.V[x] <<= 1;
         self.pc += 2;
     }
 
     /// Skips the next instruction if VX doesn't equal VY.
     /// (Usually the next instruction is a jump to skip a code block)
-    fn opcode_9XY0(&mut self) {
-        match self.VX() != self.VY() {
+    fn opcode_9XY0(&mut self, x: usize, y: usize) {
+        match self.V[x] != self.V[y] {
             true => self.pc += 4,
             false => self.pc += 2,
         }
     }
 
     /// Sets I to the address NNN
-    fn opcode_ANNN(&mut self) {
-        self.I = self.NNN();
+    fn opcode_ANNN(&mut self, n: u16) {
+        self.I = n;
         self.pc += 2;
     }
 
     /// Jumps to the address NNN plus V0.
-    fn opcode_BNNN(&mut self) {
-        self.pc = self.NNN() as usize + self.V[0] as usize;
+    fn opcode_BNNN(&mut self, n: usize) {
+        self.pc = n + self.V[0] as usize;
     }
 
     /// Sets VX to the result of a bitwise and operation on
     /// a random number (Typically: 0 to 255) and NN.
-    fn opcode_CXNN(&mut self) {
+    fn opcode_CXNN(&mut self, x: usize, n: u8) {
         let rand: u8 = rand::thread_rng().gen();
 
-        self.V[self.X()] = rand & self.NN();
+        self.V[x] = rand & n;
         self.pc += 2;
     }
 
@@ -330,10 +287,9 @@ impl Cpu {
     /// I value doesn’t change after the execution of this instruction.
     /// As described above, VF is set to 1 if any screen pixels are flipped
     /// from set to unset when the sprite is drawn, and to 0 if that doesn’t happen.
-    fn opcode_DXYN(&mut self) {
-        let X = self.VX() as usize;
-        let Y = self.VY() as usize;
-        let N = self.N() as usize; // heigth
+    fn opcode_DXYN(&mut self, x: usize, y: usize, N: usize) {
+        let X = self.V[x] as usize;
+        let Y = self.V[y] as usize;
 
         self.V[0xF] = 0;
         for y in 0..N {
@@ -355,27 +311,27 @@ impl Cpu {
 
     /// Skips the next instruction if the key stored in VX is pressed.
     /// (Usually the next instruction is a jump to skip a code block)
-    fn opcode_EX9E(&mut self) {
-        match self.key[self.VX() as usize] {
+    fn opcode_EX9E(&mut self, x: usize) {
+        match self.key[self.V[x] as usize] {
             true => self.pc += 4,
             false => self.pc += 2,
         }
-        self.key[self.VX() as usize] = false;
+        self.key[self.V[x] as usize] = false;
     }
 
     /// Skips the next instruction if the key stored in VX isn't pressed.
     /// (Usually the next instruction is a jump to skip a code block)
-    fn opcode_EXA1(&mut self) {
-        match self.key[self.VX() as usize] {
+    fn opcode_EXA1(&mut self, x: usize) {
+        match self.key[self.V[x] as usize] {
             true => self.pc += 2,
             false => self.pc += 4,
         }
-        self.key[self.VX() as usize] = false;
+        self.key[self.V[x] as usize] = false;
     }
 
     /// Sets VX to the value of the delay timer.
-    fn opcode_FX07(&mut self) {
-        self.V[self.X()] = self.delay_timer;
+    fn opcode_FX07(&mut self, x: usize) {
+        self.V[x] = self.delay_timer;
         self.pc += 2;
     }
 
@@ -383,11 +339,11 @@ impl Cpu {
     /// (Blocking Operation. All instruction halted until next key event)
     /// This is implemented by NOT incrementing the program counter (pc)
     /// so when getting the new opcode we'll re-execute this instruction
-    fn opcode_FX0A(&mut self) {
+    fn opcode_FX0A(&mut self, x: usize) {
         for (idx, key) in self.key.iter_mut().enumerate() {
             if *key {
                 *key = false;
-                self.V[self.X()] = idx as u8;
+                self.V[x] = idx as u8;
                 self.pc += 2;
                 return;
             }
@@ -396,27 +352,27 @@ impl Cpu {
     }
 
     /// Sets the delay timer to VX.
-    fn opcode_FX15(&mut self) {
-        self.delay_timer = self.VX();
+    fn opcode_FX15(&mut self, x: usize) {
+        self.delay_timer = self.V[x];
         self.pc += 2;
     }
 
     /// Sets the sound timer to VX.
-    fn opcode_FX18(&mut self) {
-        self.sound_timer = self.VX();
+    fn opcode_FX18(&mut self, x: usize) {
+        self.sound_timer = self.V[x];
         self.pc += 2;
     }
 
     /// Adds VX to I.
-    fn opcode_FX1E(&mut self) {
-        self.I = self.I.wrapping_add(self.VX() as u16);
+    fn opcode_FX1E(&mut self, x: usize) {
+        self.I = self.I.wrapping_add(self.V[x] as u16);
         self.pc += 2;
     }
 
     /// Sets I to the location of the sprite for the character in VX.
     /// Characters 0-F (in hexadecimal) are represented by a 4x5 font.
-    fn opcode_FX29(&mut self) {
-        self.I = self.VX().wrapping_mul(0x5).into();
+    fn opcode_FX29(&mut self, x: usize) {
+        self.I = self.V[x].wrapping_mul(0x5).into();
         self.pc += 2;
     }
 
@@ -428,8 +384,8 @@ impl Cpu {
     /// * Place the hundreds digit in memory at location in I
     /// * The tens digit at location I+1
     /// * And the ones digit at location I+2)
-    fn opcode_FX33(&mut self) {
-        let VX = self.VX();
+    fn opcode_FX33(&mut self, x: usize) {
+        let VX = self.V[x];
 
         self.memory[self.I] = VX / 100;
         self.memory[self.I + 1] = (VX % 100) / 10;
@@ -440,8 +396,8 @@ impl Cpu {
     /// Stores V0 to VX (including VX) in memory starting at address I.
     /// The offset from I is increased by 1 for each value written,
     /// but I itself is left unmodified.
-    fn opcode_FX55(&mut self) {
-        for i in 0..=self.X() {
+    fn opcode_FX55(&mut self, x: usize) {
+        for i in 0..=x {
             self.memory[self.I as usize + i] = self.V[i];
         }
 
@@ -451,8 +407,8 @@ impl Cpu {
     /// Fills V0 to VX (including VX) with values from memory starting
     /// at address I. The offset from I is increased by 1 for each
     /// value written, but I itself is left unmodified.
-    fn opcode_FX65(&mut self) {
-        for i in 0..=self.X() {
+    fn opcode_FX65(&mut self, x: usize) {
+        for i in 0..=x {
             self.V[i] = self.memory[self.I as usize + i];
         }
 

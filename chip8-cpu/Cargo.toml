@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 rand = "*"
+bitmatch = "0.1.0"
